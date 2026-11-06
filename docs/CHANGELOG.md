@@ -35,7 +35,7 @@ All notable changes to Foundry, newest first. Format is
   unit-tested with a fake LLM only); live web research, live
   X/analytics APIs: not implemented (deterministic stubs + seed data).
 - Live dashboard load under `hermes dashboard`: not run.
-- Desktop (`desktop/plugin.js`) surface: not built; web dashboard only.
+- Desktop (`desktop/plugin.js`) surface: not built at 0.1.0; web dashboard only. (Built in 0.1.2 — see below.)
 - No catalog PR, no demo video, no Typeform submission.
 
 ## [0.1.1] — 2026-11-06 — Hermes CLI install + validation + live Scribe wiring

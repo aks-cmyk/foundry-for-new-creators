@@ -116,7 +116,7 @@ Plugin Doctor:
    LLM-failure fallback, and a FakeCtx that **requires** `toolset`
    (guards the doctor bug).
 
-## Re-verification after fixes (2026-11-06)
+## Re-verification after fixes — first round (2026-11-06)
 
 - Smoke test: **23/23 PASS**
 - `make demo`: renders `dashboard/index.html` (3 tabs), exit 0
