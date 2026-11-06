@@ -1,0 +1,30 @@
+# Foundry — Hermes Agent plugin manifest (native, v2)
+# Verified against the official guide:
+# https://hermes-agent.nousresearch.com/docs/developer-guide/plugins
+# provides_tools MUST match what register() registers (validate fails otherwise).
+name: foundry
+version: 0.1.0
+manifest_version: 2
+api_version: 1
+license: MIT
+description: "Foundry — a creator plugin: five bots (Cartographer, Lookout, Scribe, Scorekeeper, Bursar) sharing one structured memory ledger, with a Proofing Table and Score/Money dashboards. Human approval on anything public; no auto-post."
+author: Amit Srivastava
+# homepage: UNVERIFIED — no repo URL yet. Add the real GitHub repo URL
+# here before any catalog PR; do not invent one.
+# UNVERIFIED: requires_hermes floor is the docs' example floor.
+# Verify against the live Hermes release before any catalog PR.
+requires_hermes: ">=0.21.5"
+tags: [creator, content, analytics, business]
+provides_tools:
+  - foundry_ledger_list
+  - foundry_ledger_get
+  - foundry_draft_create
+  - foundry_draft_feedback
+  - foundry_draft_approve
+  - foundry_scorecard
+  - foundry_money_summary
+  - foundry_dashboard_render
+python_dependencies: []
+config_schema:
+  platform: {type: str, default: "x", description: "Default platform for drafts (MVP: x)"}
+  currency: {type: str, default: "USD", description: "Currency for Money Cards"}

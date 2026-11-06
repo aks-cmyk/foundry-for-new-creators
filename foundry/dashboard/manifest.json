@@ -1,0 +1,1 @@
+{"api":"plugin_api.py","css":"dist/style.css","description":"Creator plugin: Proofing Table, Scorekeeper and Bursar dashboards over one shared ledger.","entry":"dist/index.js","icon":"Sparkles","label":"Foundry","name":"foundry","tab":{"path":"/foundry","position":"end"},"version":"0.1.0"}
