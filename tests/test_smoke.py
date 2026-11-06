@@ -165,6 +165,27 @@ def main():
           set(ctx.toolsets.values()) == {"foundry"})
     check("register() registers foundry-creator skill", "foundry-creator" in ctx.skills)
 
+    # Desktop half (fix 2026-11-06): single ESM file, allowed imports
+    # only, route + sidebar nav, same backend via ctx.rest.
+    desktop = (ROOT / "foundry" / "desktop" / "plugin.js").read_text()
+    check("desktop/plugin.js exists and default-exports id 'foundry'",
+          "id: 'foundry'" in desktop and "export default" in desktop)
+    check("desktop/plugin.js imports only @hermes/plugin-sdk, react, react/jsx-runtime",
+          "from '@hermes/plugin-sdk'" in desktop
+          and "from 'react'" in desktop
+          and "from 'react/jsx-runtime'" in desktop
+          and "from '" not in desktop.replace("from '@hermes/plugin-sdk'", "")
+          .replace("from 'react'", "").replace("from 'react/jsx-runtime'", ""))
+    check("desktop/plugin.js registers a /foundry route + sidebar nav",
+          "ROUTES_AREA" in desktop and "SIDEBAR_NAV_AREA" in desktop
+          and "path: '/foundry'" in desktop)
+    check("desktop/plugin.js reaches the shared backend via ctx.rest",
+          "rest('/cards')" in desktop and "rest('/feedback'" in desktop
+          and "method: 'POST'" in desktop)
+    check("desktop/plugin.js has no alert()/eval/document reach",
+          "alert(" not in desktop and "eval(" not in desktop
+          and "document." not in desktop)
+
     # Dashboard render
     from scripts.render_dashboard import render
     out_path = render()
