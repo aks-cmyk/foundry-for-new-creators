@@ -42,7 +42,9 @@ hermes plugins doctor foundry --ci
 hermes plugins enable foundry
 ```
 
-Expected: validate PASS, doctor PASS with **8 tools registered**.
+Expected: validate PASS, doctor PASS with **7 tools registered**.
+(The count was 8 before the 2026-11-06 fix round dropped the
+`foundry_dashboard_render` tool, which failed in a live install.)
 If doctor shows 0 tools, or validate fails, stop and send Zuzu the
 full output — do not work around it.
 
