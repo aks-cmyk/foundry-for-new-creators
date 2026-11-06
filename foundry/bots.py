@@ -3,11 +3,18 @@
 Bots are pure functions over the ledger. They never talk to each other
 directly; they only read/write ledger cards (see docs/ARCHITECTURE.md).
 
-MVP honesty: Scribe's revision is a rule-based rewrite of the seeded
-draft, NOT a live LLM call. Lookout does not fetch the web — Evidence
-Cards come from seed data or user-supplied sources. Live wiring
-(Scribe via ctx.llm, Lookout via search) is the next build step and
-its exact ctx.llm call shape is UNVERIFIED (docs/RESEARCH.md).
+MVP honesty: Scribe's revision uses the host LLM via ctx.llm when a
+ctx is bound (see tools.bind_ctx), falling back to the deterministic
+rule-based rewrite when no ctx is bound or the LLM call fails — the
+card payload records "generation": "llm" or "rule-based" so the
+provenance is visible. Lookout does not fetch the web — Evidence
+Cards come from seed data or user-supplied sources: no ctx web-search
+surface exists in Hermes v0.23.0 (checked 2026-11-06), so Lookout
+stays agent-supplied. ctx.llm call shape VERIFIED against installed
+Hermes v0.23.0 (agent/plugin_llm.py): PluginLlm.complete(messages,
+temperature=..., max_tokens=..., timeout=..., purpose=...) ->
+result.text; plain calls with no provider/model override pass the
+default trust gate.
 """
 from __future__ import annotations
 
@@ -93,21 +100,83 @@ def _sharpen_hook(hook: str) -> str:
     return hook.rstrip(".") + ": " + "here is the fix, in one thread."
 
 
-def scribe_revise(conn, *, draft_id: str, note: str) -> dict:
+def _llm_revise_text(llm_complete, *, draft_text: str, note: str,
+                     identity: dict | None, evidence: dict | None) -> dict | None:
+    """Ask the host LLM to revise a draft per the human's note.
+    Returns {"hook": ..., "text": ...} or None on any failure (caller
+    falls back to the rule-based rewrite). The model must only restate
+    facts already on the cited Evidence Card — it never invents new
+    claims."""
+    voice = ""
+    if identity:
+        p = identity["payload"]
+        voice = (f"Voice: writes for {p.get('audience', '')}. "
+                 f"Pillars: {', '.join(p.get('pillars', []))}. "
+                 f"Never: {', '.join(p.get('voice_donts', []))}.")
+    facts = ""
+    if evidence:
+        facts = ("Grounded facts (use only these, cite nothing else): " +
+                 "; ".join(evidence["payload"].get("confirmed", [])))
+    messages = [
+        {"role": "system", "content":
+         "You are Scribe, the writer bot of a creator plugin. Revise the "
+         "X thread draft below per the human's one-line note. Keep it an "
+         "X thread (short posts, one idea each). " + voice + " " + facts +
+         " Reply with JSON only: {\"hook\": \"...\", \"body\": [\"post 1\", ...]}."},
+        {"role": "user", "content":
+         f"Current draft:\n{draft_text}\n\nHuman note: {note}"},
+    ]
+    try:
+        raw = llm_complete(messages)
+        parsed = json.loads(raw)
+        hook = str(parsed["hook"]).strip()
+        body = [str(p).strip() for p in parsed["body"] if str(p).strip()]
+        if not hook or not body:
+            return None
+        return {"hook": hook, "text": "\n\n".join([hook] + body)}
+    except Exception:
+        return None
+
+
+def scribe_revise(conn, *, draft_id: str, note: str,
+                  llm_complete=None) -> dict:
     """Apply a Revision Card to a draft and return a new Draft Card (v+1).
-    The original is never mutated."""
+    The original is never mutated. With llm_complete (a callable taking
+    a messages list and returning text), the revision is written by the
+    host LLM; without it, or if the LLM call fails, the deterministic
+    rule-based rewrite is used. The card records which path ran."""
     draft = ledger.get_card(conn, draft_id)
     if draft is None:
         raise ValueError(f"no Draft Card {draft_id}")
     payload = dict(draft["payload"])
-    lowered = note.lower()
-    if "hook" in lowered:
-        payload["hook"] = _sharpen_hook(payload["hook"])
-        first, *rest = payload["text"].split("\n\n", 1)
-        payload["text"] = payload["hook"] + ("\n\n" + rest[0] if rest else "")
-    elif "short" in lowered:
-        payload["text"] = payload["text"][:600]
+    generation = "rule-based"
+    llm_result = None
+    if llm_complete is not None:
+        evidence = None
+        for link in draft["links"]:
+            if link["relation"] == "cites":
+                evidence = ledger.get_card(conn, link["to_id"])
+        identity = None
+        for link in draft["links"]:
+            if link["relation"] == "derived_from":
+                identity = ledger.get_card(conn, link["to_id"])
+        llm_result = _llm_revise_text(
+            llm_complete, draft_text=payload["text"], note=note,
+            identity=identity, evidence=evidence)
+    if llm_result is not None:
+        payload["hook"] = llm_result["hook"]
+        payload["text"] = llm_result["text"]
+        generation = "llm"
+    else:
+        lowered = note.lower()
+        if "hook" in lowered:
+            payload["hook"] = _sharpen_hook(payload["hook"])
+            first, *rest = payload["text"].split("\n\n", 1)
+            payload["text"] = payload["hook"] + ("\n\n" + rest[0] if rest else "")
+        elif "short" in lowered:
+            payload["text"] = payload["text"][:600]
     payload["word_count"] = len(payload["text"].split())
+    payload["generation"] = generation
     existing = ledger.list_cards(conn, kind="draft")
     n = len(existing) + 1
     new = ledger.create_card(

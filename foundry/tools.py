@@ -15,6 +15,33 @@ from . import bots, ledger
 _DEFAULT_DB = Path(__file__).parent / "data" / "foundry.db"
 _DB_PATH = _DEFAULT_DB
 
+# PluginContext bound by register() in __init__.py. None outside Hermes
+# (smoke tests, make demo) — Scribe then uses the rule-based rewrite.
+_CTX = None
+
+
+def bind_ctx(ctx) -> None:
+    global _CTX
+    _CTX = ctx
+
+
+def _llm_complete(messages: list) -> str | None:
+    """One host-LLM completion via ctx.llm (verified shape, Hermes
+    v0.23.0: PluginLlm.complete(messages, temperature, max_tokens,
+    timeout, purpose=...) -> result.text). No provider/model override,
+    so the default trust gate passes. Returns None on any failure —
+    the caller falls back to the rule-based rewrite."""
+    if _CTX is None:
+        return None
+    try:
+        result = _CTX.llm.complete(
+            messages, temperature=0.7, max_tokens=800, timeout=120,
+            purpose="foundry.scribe_revise")
+        text = result.text.strip()
+        return text or None
+    except Exception:
+        return None
+
 
 def set_db_path(path) -> None:
     global _DB_PATH
@@ -90,7 +117,9 @@ def foundry_draft_feedback(args, **kwargs):
             created_by="human")
         ledger.add_link(conn, rev["id"], draft_id, "revises")
         if ftype == "tweak":
-            new_draft = bots.scribe_revise(conn, draft_id=draft_id, note=note)
+            new_draft = bots.scribe_revise(
+                conn, draft_id=draft_id, note=note,
+                llm_complete=_llm_complete if _CTX is not None else None)
             ledger.add_event(conn, rev["id"], "applied", {"applied_in": new_draft["id"]})
             return _ok({"revision": ledger.get_card(conn, rev["id"]),
                         "revised_draft": new_draft})

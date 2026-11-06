@@ -31,14 +31,50 @@ All notable changes to Foundry, newest first. Format is
   official Hermes docs read 2026-11-06 — see `docs/RESEARCH.md`.
 
 ### Known gaps (not yet done)
-- `hermes plugins validate` / `hermes plugins doctor` **not run** —
-  Hermes CLI is not installed in this workspace (UNVERIFIED).
-- `ctx.llm` live drafting, live web research, live X/analytics APIs:
-  not implemented in the scaffold (deterministic stubs + seed data).
+- `ctx.llm` live completion never run against a real model (wired +
+  unit-tested with a fake LLM only); live web research, live
+  X/analytics APIs: not implemented (deterministic stubs + seed data).
+- Live dashboard load under `hermes dashboard`: not run.
 - Desktop (`desktop/plugin.js`) surface: not built; web dashboard only.
 - No catalog PR, no demo video, no Typeform submission.
 
+## [0.1.1] — 2026-11-06 — Hermes CLI install + validation + live Scribe wiring
+
+### Added
+- Hermes CLI installed (official route) in the workspace:
+  **v0.23.0**, Python 3.14.9 (`.hermes-src/`, isolated
+  `hidden_files/hermes-home/`; git-ignored). Install log:
+  `hidden_files/install-2026-11-06.log`.
+- `docs/VALIDATION.md`: full validate/doctor record.
+- Live Scribe: `scribe_revise(..., llm_complete=None)` calls the host
+  LLM via `ctx.llm.complete()` when a ctx is bound
+  (`tools.bind_ctx(ctx)` in `register()`), with rule-based fallback on
+  any failure; revised cards record `"generation": "llm" | "rule-based"`.
+
+### Fixed
+- **Doctor caught a real bug: `register_tool()` was called without
+  the required `toolset` argument** (real signature in v0.23.0:
+  `register_tool(name, toolset, schema, handler)`). Validate's lenient
+  stub had passed with 0 tools registered. Fixed by passing
+  `toolset="foundry"` and removing the wrong fallback; doctor now
+  passes with 8 tools registered. Smoke test's FakeCtx now requires
+  `toolset` so this cannot regress silently.
+
+### Verified
+- `hermes plugins validate`: PASS (15/15). `hermes plugins doctor`:
+  PASS (8 tools, 0 hooks). Smoke test **23/23 PASS** (5 new checks:
+  fake-LLM revise, LLM-failure fallback, toolset assertion).
+  `make demo` renders, exit 0. Dashboard backend module-checked:
+  `dist/index.js` parses under Hermes's Node 26.12.1; `plugin_api.py`
+  router serves `/cards` + `/summary` over the 9 seeded cards.
+- `ctx.llm` call shape and trust gate verified from installed source
+  (`agent/plugin_llm.py`); `ctx.register_skill` signature verified
+  (`hermes_cli/plugins_content.py`); **no `ctx` web-search surface
+  exists in v0.23.0** — Lookout stays agent-supplied.
+
 ## [Unreleased]
 
-- Live Scribe via `ctx.llm`; Lookout live search; Scorekeeper/Bursar
-  live analytics + money imports; Desktop SDK surface; catalog PR.
+- Lookout live search (needs a `ctx` surface or MCP route — none
+  verified); Scorekeeper/Bursar live analytics + money imports;
+  Desktop SDK surface; catalog PR (needs catalog entry format read +
+  a real repo URL for `homepage`); demo video; Typeform submission.

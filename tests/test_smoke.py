@@ -64,6 +64,25 @@ def main():
         check("scribe revise creates v2, original untouched",
               revised["version"] == 2 and revised["supersedes_id"] == draft["id"]
               and ledger.get_card(conn, draft["id"])["payload"]["hook"] == "A test hook.")
+        check("rule-based revise marks generation", revised["payload"].get("generation") == "rule-based")
+
+        # Live Scribe path (fake llm): JSON reply replaces the draft
+        def fake_llm(messages):
+            assert messages[0]["role"] == "system" and "Scribe" in messages[0]["content"]
+            return json.dumps({"hook": "LLM hook.", "body": ["LLM post one.", "LLM post two."]})
+        llm_revised = bots.scribe_revise(conn, draft_id=revised["id"], note="sharper hook",
+                                         llm_complete=fake_llm)
+        check("llm revise uses model text + marks generation=llm",
+              llm_revised["payload"]["hook"] == "LLM hook."
+              and llm_revised["payload"]["text"].startswith("LLM hook.\n\nLLM post one.")
+              and llm_revised["payload"].get("generation") == "llm")
+        # Failing llm falls back to the rule-based rewrite, never raises
+        def bad_llm(messages):
+            raise RuntimeError("model down")
+        fb = bots.scribe_revise(conn, draft_id=llm_revised["id"], note="sharper hook",
+                                llm_complete=bad_llm)
+        check("llm failure falls back to rule-based",
+              fb["payload"].get("generation") == "rule-based" and fb["version"] == 4)
         perf = bots.scorekeeper_verdict(conn, draft_id=revised["id"],
                                         metrics={"views": 100, "likes": 10, "reposts": 40, "replies": 20, "saves": 5})
         check("scorekeeper verdict repeat on engagement>=50", perf["payload"]["verdict"] == "repeat")
@@ -87,18 +106,26 @@ def main():
           declared == schema_names == sorted(tools.HANDLERS.keys()) or
           set(declared) == set(schema_names) == set(tools.HANDLERS.keys()))
 
-    # register() with a fake ctx
+    # register() with a fake ctx — records the toolset kwarg, because
+    # doctor (2026-11-06) caught the real bug: register_tool() requires
+    # toolset, and validate's stub accepts anything.
     class FakeCtx:
         def __init__(self):
             self.tools = {}
+            self.toolsets = {}
             self.skills = {}
-        def register_tool(self, name=None, schema=None, handler=None, **kw):
+        def register_tool(self, name=None, schema=None, handler=None, toolset=None, **kw):
+            if toolset is None:
+                raise TypeError("register_tool() missing required argument: 'toolset'")
             self.tools[name or schema["name"]] = handler
+            self.toolsets[name or schema["name"]] = toolset
         def register_skill(self, name, path):
             self.skills[name] = path
     ctx = FakeCtx()
     foundry_plugin.register(ctx)
     check("register() registers 8 tools", len(ctx.tools) == 8)
+    check("register() passes toolset='foundry' for all tools",
+          set(ctx.toolsets.values()) == {"foundry"})
     check("register() registers foundry-creator skill", "foundry-creator" in ctx.skills)
 
     # Dashboard render

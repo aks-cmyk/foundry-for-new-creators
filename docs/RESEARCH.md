@@ -12,6 +12,28 @@ presented as fact.
 | https://hermes-agent.nousresearch.com/docs/developer-guide/plugins/catalog-submission | Catalog admission rules (18 rules, mirrored from `plugin-catalog/README.md`) |
 | https://hermes-agent.nousresearch.com/docs/user-guide/features/extending-the-dashboard | Web-dashboard plugin format: `manifest.json` + IIFE bundle + FastAPI backend |
 | https://x.com/NousResearch/status/2118094256438936062 (read live in a browser task, 2026-11-05) | Hackathon post itself: 7 days, $20,000, deadline 5 PM EST Nov 11, entry route, judging criteria |
+| Installed Hermes v0.23.0 source (`.hermes-src/`, 2026-11-06) | Exact `register_tool` signature, `ctx.llm` call shape, trust gate, `register_skill` signature; dashboard loader not in CLI code |
+| https://hermes-agent.nousresearch.com/docs/getting-started/installation (read 2026-11-06) | Official install route: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh \| bash` |
+
+## Hermes CLI install — verified 2026-11-06
+
+- Install command (official route, flags from the docs page):
+  `bash hidden_files/install.sh --dir "$PWD/.hermes-src" --hermes-home "$PWD/hidden_files/hermes-home" --non-interactive --skip-browser --skip-computer-use`
+  (installer script saved at `hidden_files/install.sh`; full log at
+  `hidden_files/install-2026-11-06.log` — both git-ignored bookkeeping).
+- Installed: **Hermes Agent v0.23.0** (2026.9.24), stable, local commit
+  `2bd378ed1b8d`; **Python 3.14.9**; uv 0.13.5; OpenAI SDK 2.54.0.
+  Launcher: `~/.local/bin/hermes`. Isolated `HERMES_HOME` =
+  `hidden_files/hermes-home` (the real `~/.hermes` was never touched).
+- `hermes --version` prints the version. **`hermes version` is NOT a
+  command** (`hermes: 'version' is not a hermes command` — the docs'
+  version subcommand does not exist in v0.23.0).
+- Two non-fatal warnings during install: `mv: failed to preserve
+  ownership` for uv/uvx (operation not permitted in this sandbox).
+  Install exit code 0.
+- Install lives in the goal workspace (`.hermes-src/`,
+  `hidden_files/hermes-home/`), git-ignored — there is no separate
+  `.venv-hermes`; the installer manages its own venv/tools.
 
 ## Hackathon — verified
 
@@ -127,23 +149,64 @@ From the catalog-submission page (18 rules; canonical copy is
 18. Password-manager login backends only from the vendor, at
     `verified`/`official` tier. (Not applicable to Foundry.)
 
+## Validation + live ctx surface — verified 2026-11-06
+
+Full record: `docs/VALIDATION.md`.
+
+- **`hermes plugins validate` on Foundry: PASS** (15/15 checks,
+  exit 0). **`hermes plugins doctor`: PASS** (8 tools registered)
+  after one fix — see below. Both re-run after every change.
+- **`ctx.register_tool` — exact signature** (`hermes_cli/plugins.py:463`):
+  `register_tool(name, toolset, schema, handler, check_fn=None, ...)`.
+  **`toolset` is required** — a call without it raises `TypeError`.
+  Foundry passes `toolset="foundry"` (bundled `google_meet` passes
+  `toolset="google_meet"`). Keyword form works.
+- **Validate ≠ doctor.** Validate probes `register()` with a lenient
+  stub (`RecordingContext.register_tool` accepts anything), so it
+  passed while 0 tools were actually registered. Doctor runs the real
+  `PluginContext` and caught the missing-`toolset` bug. Run both;
+  doctor is the one that proves registration works. Doctor also exits
+  0 even on registration failure — read its output, not its exit code.
+- **`ctx.llm` — exact shape** (`agent/plugin_llm.py`, class `PluginLlm`,
+  exposed as `PluginContext.llm`):
+  `complete(messages: list[dict], *, provider=None, model=None, temperature=None, max_tokens=None, timeout=None, agent_id=None, profile=None, purpose=None, task=None) -> PluginLlmCompleteResult` with `.text`, `.provider`, `.model`, `.usage`.
+  `complete_structured(*, instructions, input, json_schema=None, json_mode=False, ...) -> PluginLlmStructuredResult` with `.parsed`.
+  Plain calls with **no provider/model override pass the default trust
+  gate** (missing `plugins.entries.<id>.llm` config → fully restrictive
+  only on *overrides*). Scribe uses `complete()` with no overrides.
+  **Wired, not live-tested:** `scribe_revise` takes an `llm_complete`
+  callable; `tools.bind_ctx(ctx)` in `register()` lets handlers call
+  `ctx.llm.complete(...)`; any failure falls back to the rule-based
+  rewrite and the card records `"generation": "llm" | "rule-based"`.
+  No real completion has run (no model configured in this workspace).
+- **`ctx.register_skill` — exact signature**
+  (`hermes_cli/plugins_content.py:32`):
+  `register_skill(name, path, description="", frontmatter=None)`;
+  name must NOT contain `:` (namespace is derived from the plugin
+  name). Foundry's `register_skill("foundry-creator", skill_md)` is
+  correct as written.
+- **No `ctx` web-search surface in v0.23.0.** `plugins.py` has no
+  search/fetch method on `PluginContext`; web search lives in
+  `tools/web_tools.py` / `agent/web_search_provider.py` as host
+  internals, not a plugin-facing API. Lookout therefore stays
+  agent-supplied (host agent searches, passes sources in) — no
+  plugin-internal fetch. A plugin could reach it via `ctx.call_mcp`
+  to a configured search MCP server, but no such server is configured
+  or verified here.
+- **Dashboard extension NOT covered by validate/doctor** — neither
+  mentions it. Module-level checks 2026-11-06: `dist/index.js`
+  parses under Hermes's own Node 26.12.1; `plugin_api.py` imports
+  under FastAPI, router has `GET /cards` + `GET /summary`, reads the
+  9 seeded cards. Live load under `hermes dashboard` still UNVERIFIED.
+- **Current release is v0.23.0** (verified via `hermes --version`).
+  `requires_hermes: ">=0.21.5"` in `plugin.yaml` remains the docs'
+  example floor — the minimum release that actually ships the APIs
+  Foundry uses (`register_tool` with `toolset`, `ctx.llm`) has not
+  been bisected, so the floor is still a placeholder, not a verified
+  minimum.
+
 ## UNVERIFIED — do not present as fact
 
-- **`hermes plugins validate` / `hermes plugins doctor` on Foundry.**
-  Hermes CLI is not installed in this workspace (`hermes: command not
-  found`, 2026-11-06). The scaffold follows the documented format, but
-  it has **not** passed the catalog check. Run both before any PR.
-- **`requires_hermes` floor.** The docs' example floor is `">=0.21.5"`.
-  Foundry's `plugin.yaml` uses that as a placeholder floor; the correct
-  floor for the APIs Foundry actually uses (dashboard backend, `ctx.llm`
-  if added) has not been verified against a live Hermes release.
-  The docs also say a floor must never be newer than the current release
-  — the current release version was not checked here.
-- **`ctx.llm` call shape, `ctx.register_tool` exact kwargs, and the
-  `ctx` object surface** beyond what is quoted above. The scaffold's
-  `__init__.py` uses `ctx.register_tool(name=…, schema=…, handler=…)`
-  and `ctx.register_skill(name, path)` as shown in the guide's examples;
-  the exact kwarg names have not been executed against a live Hermes.
 - **Live X / analytics / money APIs.** No live X, Buffer, Stripe or
   analytics integration exists in the scaffold. Scorekeeper/Bursar
   numbers in the seed are illustrative example data, not real metrics.
@@ -151,3 +214,8 @@ From the catalog-submission page (18 rules; canonical copy is
   entry PR itself) — not read in full. Required before the PR.
 - **The plugin-catalog repo / entry PR mechanics** beyond the rules
   above — the PR is not drafted yet and needs Amit's go-ahead.
+- **Live dashboard load** under `hermes dashboard` (see above) and
+  **live `ctx.llm` completion** (see above) — wired and unit-tested,
+  never run against a live model/gateway.
+- **`plugin.yaml` has no `homepage`** — no repo URL exists yet; do not
+  invent one. Needed before the catalog PR.
