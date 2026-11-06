@@ -26,3 +26,11 @@ auth.json
 .DS_Store
 .vscode/
 .idea/
+
+# Hermes CLI install (official source installer, isolated to this workspace)
+.venv-hermes/
+.hermes-src/
+hidden_files/hermes-home/
+
+# Goal bookkeeping (validation logs, install logs, Hermes home) — not part of the plugin repo
+hidden_files/
