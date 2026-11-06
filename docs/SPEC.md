@@ -149,9 +149,8 @@ no content-only tool can surface.
 
 ### Post-hackathon backlog (explicitly NOT in the MVP)
 
-- Live Scribe via `ctx.llm`; live Lookout web search; live X /
-  analytics / money imports.
-- Desktop SDK surface (`desktop/plugin.js`).
+- Live Scribe via `ctx.llm` (wired, not live-tested); live Lookout web
+  search; live X / analytics / money imports.
 - Multi-platform (LinkedIn, Substack, YouTube), multi-format.
 - Partnership CRM beyond one seeded deal; tax integrations.
 - Multi-creator / agency mode (1–3 clients).
@@ -167,9 +166,13 @@ no content-only tool can surface.
 | `foundry_draft_approve` | Mark a Draft Card approved (human approval gate) |
 | `foundry_scorecard` | Scorekeeper summary for a draft / period |
 | `foundry_money_summary` | Bursar P&L for a draft / client / period |
-| `foundry_dashboard_render` | Render the three-tab dashboard HTML from the ledger |
 
 All handlers return JSON strings, never raise (per the official guide).
+(Dropped 2026-11-06: `foundry_dashboard_render` — it imported
+`scripts/`, which is not inside an installed plugin folder. Static
+rendering for demos lives in `scripts/render_dashboard.py`; the live
+boards are the web dashboard and the Desktop half, served by
+`plugin_api.py`.)
 
 ## 8. 90-second demo script
 

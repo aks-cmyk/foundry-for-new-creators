@@ -122,3 +122,61 @@ Plugin Doctor:
 - `make demo`: renders `dashboard/index.html` (3 tabs), exit 0
 - `hermes plugins validate`: PASS
 - `hermes plugins doctor`: PASS, 8 tools registered
+
+## Second round — ledger + feedback + Desktop (2026-11-06)
+
+Full log: `hidden_files/validation-2026-11-06b.log`.
+
+### Fixes
+1. **Ledger location** (`foundry/storage.py`, new): the ledger now lives
+   at `plugin_db("foundry")` → `<hermes home>/plugin-data/foundry/data.db`,
+   shared by tool handlers and the dashboard backend through one
+   resolution (test override + standalone fallback to the local demo DB).
+   Verified in the VM: with the isolated `HERMES_HOME`,
+   `storage.db_path()` resolves to
+   `hidden_files/hermes-home/plugin-data/foundry/data.db` and
+   `storage.connect()` creates + seeds it with the 9 demo cards.
+   **Caution learned:** running a check under Hermes's own venv python
+   *without* `HERMES_HOME` set resolves to the real `~/.hermes` and
+   created a seeded `~/.hermes/plugin-data/foundry/data.db` — removed
+   afterwards. Always run Hermes-venv checks with the isolated
+   `HERMES_HOME` set.
+2. **Dashboard buttons**: `POST /feedback` added to `plugin_api.py`
+   (writes a real Revision Card; tweak returns a revised draft,
+   rule-based in the dashboard process — no `ctx.llm` is bound there).
+   `dist/index.js` Approve/Tweak/Reject now call it via
+   `SDK.fetchJSON` (POST shape verified from the bundled kanban plugin:
+   `fetchJSON(url, { method: "POST", headers: {...}, body: JSON.stringify(...) })`).
+   Router registration verified under Hermes's venv python
+   (FastAPI 0.133.1): routes are `GET /cards`, `GET /summary`,
+   `POST /feedback`. Note: system Python has no FastAPI, so the smoke
+   test exercises the endpoint functions directly and checks the router
+   only when it exists.
+3. **Desktop half** (`foundry/desktop/plugin.js`): single ESM file,
+   imports only `@hermes/plugin-sdk`, `react`, `react/jsx-runtime`;
+   registers a `/foundry` route + sidebar nav + palette command,
+   mirroring the web board over the same backend via `ctx.rest`.
+   Verified: parses under Hermes's Node 26.12.1; installed-source
+   desktop surface lint clean (`desktop_surface_hits` = []);
+   `desktop_source()` resolves `foundry/desktop`;
+   `check_desktop_tree` = None. Ships opt-in (`defaultEnabled: false`).
+4. **Dropped `foundry_dashboard_render` tool** (8 → 7 tools): it did
+   `from scripts.render_dashboard import render`, but `scripts/` is
+   not inside an installed plugin folder. Static rendering for demos
+   still lives in `scripts/render_dashboard.py` (`make demo`).
+
+### Re-verification after these fixes
+- Smoke test: **34/34 PASS** (system Python 3.12 and Hermes venv
+  Python 3.14 — the storage-resolution check is hermetic across both).
+- `make demo`: renders, exit 0.
+- `hermes plugins validate`: **PASS, 16 checks** (was 15 — new check
+  "desktop surface — stays inside the plugin SDK surface" ✓; "loadable"
+  now lists `__init__.py, desktop/plugin.js`).
+- `hermes plugins doctor`: **PASS, 7 tools registered**, 0 hooks.
+
+### Still NOT covered by validate/doctor
+- Live load of the web dashboard under `hermes dashboard` and of the
+  Desktop half in a live `hermes desktop` — neither runs in this
+  workspace. Both need Amit's Mac Studio.
+- Live `ctx.llm` completion against a real model (wired, fake-LLM
+  tested only).

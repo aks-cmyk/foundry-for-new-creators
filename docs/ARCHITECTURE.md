@@ -8,15 +8,17 @@
                  │  plugin.yaml + register(ctx) │
                  └──────────────┬───────────────┘
                                 │
-              ┌─────────────────┼─────────────────┐
-              │                 │                 │
-     ┌────────▼──────┐  ┌──────▼───────┐  ┌──────▼────────┐
-     │  Tools (8)    │  │  Skills      │  │  Dashboard    │
-     │  schemas.py   │  │  foundry-    │  │  dashboard/   │
-     │  tools.py     │  │  creator     │  │  manifest.json│
-     └───────┬───────┘  └──────────────┘  │  dist/index.js│
-             │                             │  plugin_api.py│
-             └──────────────┬──────────────┘
+              ┌─────────────────┼─────────────────┬─────────────────┐
+              │                 │                 │                 │
+     ┌────────▼──────┐  ┌──────▼───────┐  ┌──────▼────────┐  ┌──────▼───────┐
+     │  Tools (7)    │  │  Skills      │  │  Dashboard    │  │  Desktop     │
+     │  schemas.py   │  │  foundry-    │  │  dashboard/   │  │  desktop/    │
+     │  tools.py     │  │  creator     │  │  manifest.json│  │  plugin.js   │
+     └───────┬───────┘  └──────────────┘  │  dist/index.js│  │  (ESM, SDK)  │
+             │                             │  plugin_api.py│  └──────┬───────┘
+             └──────────────┬──────────────┘               │
+                            │              (same backend ──┘
+                            │               /api/plugins/foundry/)
                             │
                    ┌────────▼────────┐
                    │  Bots (bots.py) │
@@ -38,7 +40,7 @@
 ## Components
 
 ### Plugin entry (`foundry/__init__.py`)
-`register(ctx)` only. It registers the 8 tools (schema + handler)
+`register(ctx)` only. It registers the 7 tools (schema + handler)
 and the bundled skill. It does no work at import time, opens no
 network connections, and never raises on registration failure —
 a failed registration is logged and the plugin loads degraded.
@@ -68,13 +70,18 @@ wiring (Scribe via `ctx.llm`, Lookout via a search provider) is
 the Sat Nov 7 step in the plan, and its exact `ctx.llm` call shape
 is UNVERIFIED — see RESEARCH.md.
 
-### Ledger (`foundry/ledger.py`)
+### Ledger (`foundry/ledger.py`, `foundry/storage.py`)
 SQLite, one database, three tables (`cards`, `links`, `events`).
-Field model: `docs/LEDGER.md`. In Hermes, the database lives at
-`plugin_db("foundry")` (via `plugins.plugin_storage`); in this
-scaffold, at `data/foundry.db`, regenerated from `foundry/data/seed.json`
-by `scripts/seed.py`. The ledger module accepts an explicit path so
-tests use a temp file and never touch the demo DB.
+Field model: `docs/LEDGER.md`. The database lives at
+`plugin_db("foundry")` — `<hermes home>/plugin-data/foundry/data.db` —
+resolved by `foundry/storage.py`, which tool handlers (`tools._conn()`)
+and the dashboard backend (`plugin_api._conn()`) both use, so they can
+never read different databases. Outside Hermes (smoke tests, `make
+demo`) it falls back to the local `foundry/data/foundry.db`; tests
+override it with `tools.set_db_path()`. A brand-new durable database
+is seeded from `foundry/data/seed.json` on first use only — never on a
+non-empty database. (Fixed 2026-11-06: the scaffold stored the DB
+inside the plugin folder, where update/remove would delete it.)
 
 Ledger invariants enforced in code:
 - Every card has a unique id, a kind, a version, a status, a
@@ -93,7 +100,14 @@ Web-dashboard extension, per the official dashboard guide:
 entry `dist/index.js`), an IIFE JS bundle using only
 `window.__HERMES_PLUGIN_SDK__` (React + components from the SDK,
 never bundled), and `plugin_api.py` (FastAPI router, mounted at
-`/api/plugins/foundry/`).
+`/api/plugins/foundry/` — `GET /cards`, `GET /summary`,
+`POST /feedback`).
+
+Approve / Tweak / Reject on the Proofing Table are real: they POST to
+`/feedback`, which writes a Revision Card (tweak returns a revised
+draft; rule-based in the dashboard process, since no `ctx.llm` is
+bound there — the live-LLM path runs in tool handlers). Fixed
+2026-11-06: the buttons were `alert()` stubs.
 
 The scaffold also ships `scripts/render_dashboard.py`, which renders
 a **static, self-contained** `dashboard/index.html` from the ledger
@@ -102,6 +116,8 @@ artifact, not the dashboard extension itself: the extension is the
 `dist/index.js` + `plugin_api.py` pair. Both read the same ledger
 shape, so the demo and the real surface cannot drift apart silently
 — the smoke test renders from the same seed the extension serves.
+(The old `foundry_dashboard_render` *tool* was dropped 2026-11-06: it
+imported `scripts/`, which is not inside an installed plugin folder.)
 
 **UNVERIFIED:** the dashboard bundle has not been loaded in a live
 `hermes dashboard`. The SDK component names used (`Card`,
@@ -109,6 +125,19 @@ shape, so the demo and the real surface cannot drift apart silently
 etc.) are copied from the official dashboard guide; whether the
 installed Hermes version exposes exactly those names has not been
 executed against a live dashboard.
+
+### Desktop (`foundry/desktop/plugin.js`)
+Desktop GUI half, per the Desktop Plugin SDK ("One package, both
+SDKs"): a single ESM file default-exporting a `HermesPlugin`
+(`id: 'foundry'`, `defaultEnabled: false` — opt-in), importing only
+`@hermes/plugin-sdk`, `react`, `react/jsx-runtime`, written with
+`jsx()`/`jsxs()` calls (no JSX, no build step). It registers a
+`/foundry` full page + sidebar nav + palette command, mirroring the
+web board (Proofing / Score / Money) over the *same* backend via
+`ctx.rest('/cards')` and `POST /feedback`. Verified 2026-11-06:
+parses under Hermes's Node 26.12.1; desktop surface lint clean;
+`hermes plugins validate` passes its desktop-surface check.
+**UNVERIFIED:** never loaded in a live `hermes desktop`.
 
 ### Skills (`foundry/skills/foundry-creator/SKILL.md`)
 One bundled skill, registered via `ctx.register_skill`, namespaced
@@ -137,10 +166,12 @@ Read-only, as the guide requires.
 | `plugin_data_dir` / `plugin_db` durable-state pattern | Verified from docs (exact import quoted) |
 | Catalog rules (SHA pin, validate, disclosures) | Verified from docs |
 | Ledger, bots, dashboard render, smoke test | Verified by running them here (see test output in report) |
-| `hermes plugins validate` / `doctor` on Foundry | **UNVERIFIED** — no Hermes CLI in this workspace |
+| `hermes plugins validate` / `doctor` on Foundry | **Verified** 2026-11-06: validate PASS (16 checks, incl. desktop surface), doctor PASS (7 tools) — see `docs/VALIDATION.md` |
 | `ctx.llm` live drafting; live search; live X/analytics | **Not implemented** in scaffold (stubs + seed) |
 | Dashboard bundle in a live `hermes dashboard` | **UNVERIFIED** |
-| Desktop SDK surface | Not built (backlog) |
+| Desktop half in a live `hermes desktop` | **Built, statically verified, UNVERIFIED live** (no Desktop app in this workspace) |
+| Ledger location | **Fixed** 2026-11-06: `plugin_db("foundry")` via `foundry/storage.py` |
+| Dashboard Approve/Tweak/Reject | **Fixed** 2026-11-06: real `POST /feedback` + revised draft |
 
 ## Security / safety notes
 

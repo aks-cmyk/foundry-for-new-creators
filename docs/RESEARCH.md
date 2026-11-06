@@ -14,6 +14,8 @@ presented as fact.
 | https://x.com/NousResearch/status/2118094256438936062 (read live in a browser task, 2026-11-05) | Hackathon post itself: 7 days, $20,000, deadline 5 PM EST Nov 11, entry route, judging criteria |
 | Installed Hermes v0.23.0 source (`.hermes-src/`, 2026-11-06) | Exact `register_tool` signature, `ctx.llm` call shape, trust gate, `register_skill` signature; dashboard loader not in CLI code |
 | https://hermes-agent.nousresearch.com/docs/getting-started/installation (read 2026-11-06) | Official install route: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh \| bash` |
+| https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk (read 2026-11-06) | Desktop Plugin SDK: three unrelated plugin systems; single ESM `plugin.js` default-exporting a `HermesPlugin`; imports only `@hermes/plugin-sdk`, `react`, `react/jsx-runtime`; `ctx.rest`/`ctx.socket` to the shared `/api/plugins/<id>` backend; "One package, both SDKs" layout (`desktop/plugin.js` copied to `$HERMES_HOME/desktop-plugins/<id>/`); `defaultEnabled`, Capabilities → Plugins opt-in; backend gated by `plugins.enabled` |
+| Installed Hermes v0.23.0 source (`.hermes-src/`, 2026-11-06, second round) | `plugins/plugin_storage.py` (exact `plugin_db`/`plugin_data_dir` behaviour); `hermes_cli/plugin_validate_desktop.py` (surface lint rules); `hermes_cli/desktop_plugin_halves.py` (`desktop_source`, `check_desktop_tree`, copy/marker contract); `apps/desktop/src/plugins/radio/plugin.js` (in-tree disk-plugin precedent: SDK imports, `jsx`/`jsxs`, `useState`/`useEffect` from `react`); `apps/desktop/src/plugins/kanban/plugin.tsx` + `api.ts` (`ctx.rest` POST shape `{ method: 'POST', body: {...} }`, ROUTES_AREA + SIDEBAR_NAV_AREA); `web/src/lib/api.ts` + bundled kanban dashboard (`SDK.fetchJSON` POST shape for the web board) |
 
 ## Hermes CLI install — verified 2026-11-06
 
@@ -115,8 +117,17 @@ presented as fact.
   under **`/api/plugins/<name>/`**; called from the UI with
   `SDK.fetchJSON("/api/plugins/my-plugin/data")`.
 - The **native Desktop app** has its own, unrelated SDK
-  (`@hermes/plugin-sdk`) — Foundry's dashboard is the **web** dashboard
-  only in the MVP. Desktop is backlog.
+  (`@hermes/plugin-sdk`) — a single ESM `plugin.js` default-exporting a
+  `HermesPlugin`, imports limited to `@hermes/plugin-sdk`, `react`,
+  `react/jsx-runtime`, no JSX (file loads uncompiled), `ctx.rest` /
+  `ctx.socket` to the shared `/api/plugins/<id>` backend. **Foundry
+  shipped this half on 2026-11-06** (`foundry/desktop/plugin.js`:
+  `/foundry` route + sidebar nav + palette command, `defaultEnabled:
+  false`). Verified: parses under Hermes's Node 26.12.1; desktop
+  surface lint clean; `desktop_source()` resolves `foundry/desktop`;
+  `hermes plugins validate` passes 16 checks including the desktop
+  surface check. Live Desktop load still UNVERIFIED (no Desktop app
+  in this workspace).
 
 ## Catalog submission — verified
 
@@ -153,9 +164,12 @@ From the catalog-submission page (18 rules; canonical copy is
 
 Full record: `docs/VALIDATION.md`.
 
-- **`hermes plugins validate` on Foundry: PASS** (15/15 checks,
-  exit 0). **`hermes plugins doctor`: PASS** (8 tools registered)
-  after one fix — see below. Both re-run after every change.
+- **`hermes plugins validate` on Foundry: PASS** (16 checks after the
+  2026-11-06 second round — the new "desktop surface" check; was 15).
+  **`hermes plugins doctor`: PASS** (7 tools registered after the
+  `foundry_dashboard_render` drop; was 8). Both re-run after every
+  change. Full second-round record: `docs/VALIDATION.md` +
+  `hidden_files/validation-2026-11-06b.log`.
 - **`ctx.register_tool` — exact signature** (`hermes_cli/plugins.py:463`):
   `register_tool(name, toolset, schema, handler, check_fn=None, ...)`.
   **`toolset` is required** — a call without it raises `TypeError`.
@@ -193,17 +207,49 @@ Full record: `docs/VALIDATION.md`.
   plugin-internal fetch. A plugin could reach it via `ctx.call_mcp`
   to a configured search MCP server, but no such server is configured
   or verified here.
-- **Dashboard extension NOT covered by validate/doctor** — neither
-  mentions it. Module-level checks 2026-11-06: `dist/index.js`
-  parses under Hermes's own Node 26.12.1; `plugin_api.py` imports
-  under FastAPI, router has `GET /cards` + `GET /summary`, reads the
-  9 seeded cards. Live load under `hermes dashboard` still UNVERIFIED.
+- **Dashboard extension**: validate now covers the *Desktop* surface
+  (16th check) but not the web-dashboard bundle. Module-level checks
+  2026-11-06: `dist/index.js` parses under Hermes's own Node 26.12.1;
+  `plugin_api.py` imports under FastAPI 0.133.1, router has `GET /cards`
+  + `GET /summary` + `POST /feedback`, reads the 9 seeded cards.
+  Live load under `hermes dashboard` still UNVERIFIED.
+- **Ledger location — FIXED 2026-11-06**: `foundry/storage.py`
+  resolves the ledger to `plugin_db("foundry")`
+  (`<home>/plugin-data/foundry/data.db`); verified in the VM with the
+  isolated home (creates + seeds 9 cards). Tool handlers and the
+  dashboard backend share the one resolution, with a test override and
+  a standalone fallback.
 - **Current release is v0.23.0** (verified via `hermes --version`).
   `requires_hermes: ">=0.21.5"` in `plugin.yaml` remains the docs'
   example floor — the minimum release that actually ships the APIs
   Foundry uses (`register_tool` with `toolset`, `ctx.llm`) has not
   been bisected, so the floor is still a placeholder, not a verified
   minimum.
+
+## Desktop half — verified 2026-11-06
+
+- **Layout** (docs, "One package, both SDKs"): `desktop/plugin.js`
+  inside the agent package; Electron copies it to
+  `$HERMES_HOME/desktop-plugins/<id>/` beside a `.hermes-package.json`
+  marker. Confirmed in installed source
+  (`desktop_plugin_halves.py::desktop_source` returns `foundry/desktop`;
+  `check_desktop_tree` = None).
+- **Contract** (docs + `apps/desktop/src/plugins/radio/plugin.js`):
+  default-export `{ id, name, description, defaultEnabled, register(ctx) }`;
+  `ctx.registerMany` with `ROUTES_AREA` (`data: { path }`) and
+  `SIDEBAR_NAV_AREA` (`data: { path, label, codicon }`); `ctx.rest(path,
+  { method: 'POST', body: {...} })` — POST body is a plain object, not
+  a JSON string (kanban `api.ts` precedent).
+- **Surface lint** (`plugin_validate_desktop.py`): no forbidden
+  constructs in `foundry/desktop/plugin.js` (`desktop_surface_hits` =
+  []); `hermes plugins validate` runs the same check and passes it.
+- **Web board POST shape** (bundled kanban dashboard): `SDK.fetchJSON(url,
+  { method: "POST", headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body) })`.
+- **FastAPI router**: verified under Hermes's venv python (FastAPI
+  0.133.1): routes are `GET /cards`, `GET /summary`, `POST /feedback`.
+  System Python has no FastAPI — the smoke test exercises the endpoint
+  functions directly and checks the router only when it exists.
 
 ## UNVERIFIED — do not present as fact
 
@@ -214,8 +260,10 @@ Full record: `docs/VALIDATION.md`.
   entry PR itself) — not read in full. Required before the PR.
 - **The plugin-catalog repo / entry PR mechanics** beyond the rules
   above — the PR is not drafted yet and needs Amit's go-ahead.
-- **Live dashboard load** under `hermes dashboard` (see above) and
-  **live `ctx.llm` completion** (see above) — wired and unit-tested,
-  never run against a live model/gateway.
+- **Live dashboard load** under `hermes dashboard` and **live Desktop
+  load** in `hermes desktop` — built and statically verified, never run
+  against a live gateway/Desktop app. Both need Amit's Mac Studio.
+- **Live `ctx.llm` completion** — wired and unit-tested, never run
+  against a live model/gateway.
 - **`plugin.yaml` has no `homepage`** — no repo URL exists yet; do not
   invent one. Needed before the catalog PR.

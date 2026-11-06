@@ -1,8 +1,9 @@
 # Foundry — a creator plugin for Hermes Agent
 
 Foundry is an end-to-end creator plugin for Hermes Agent: a crew of five bots
-sharing **one structured memory ledger**, with a three-tab dashboard
-(Proofing Table / Scorekeeper / Bursar).
+sharing **one structured memory ledger**, with a three-tab board
+(Proofing Table / Scorekeeper / Bursar) on the web dashboard **and** in
+the Desktop app.
 
 It is the entry for the **Hermes Agent Plugin Hackathon** (announced Nov 4, 2026;
 submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
@@ -48,12 +49,15 @@ foundry/                  # the installable Hermes plugin directory
   schemas.py              # tool schemas (what the model sees)
   tools.py                # tool handlers (always return JSON strings)
   ledger.py               # shared ledger: SQLite cards + links + events
+  storage.py              # durable ledger location: plugin_db("foundry")
   bots.py                 # Cartographer / Lookout / Scribe / Scorekeeper / Bursar
   dashboard/
     manifest.json         # web-dashboard tab (name, label, tab path, entry)
     dist/index.js         # dashboard UI bundle (IIFE, SDK React)
     dist/style.css
     plugin_api.py         # FastAPI routes, mounted at /api/plugins/foundry/
+  desktop/
+    plugin.js             # Desktop GUI half (ESM, @hermes/plugin-sdk)
   skills/foundry-creator/SKILL.md
   data/seed.json          # seeded demo cards
 docs/
@@ -70,11 +74,12 @@ scripts/                  # seed.py, render_dashboard.py, demo.py
 ## Install into Hermes
 
 Validated in the VM against Hermes **v0.23.0** (2026-11-06):
-`hermes plugins validate` 15/15 PASS, `hermes plugins doctor` PASS
-(8 tools). Full record: `docs/VALIDATION.md`. Live Scribe and live
-dashboard load are still UNVERIFIED — they need Amit's Mac Studio,
-where his real Hermes lives. See `docs/MAC_STUDIO_CHECK.md` for the
-exact steps.
+`hermes plugins validate` PASS (16 checks, incl. the desktop-surface
+check), `hermes plugins doctor` PASS (7 tools). Smoke test 34/34.
+Full record: `docs/VALIDATION.md`. Live Scribe, live web-dashboard
+load, and live Desktop load are still UNVERIFIED — they need Amit's
+Mac Studio, where his real Hermes lives. See
+`docs/MAC_STUDIO_CHECK.md` for the exact steps.
 
 ```bash
 # copy the plugin into Hermes' plugin directory, then validate + doctor it
@@ -82,6 +87,8 @@ cp -r foundry ~/.hermes/plugins/foundry
 hermes plugins validate ~/.hermes/plugins/foundry --install-deps
 hermes plugins doctor foundry --ci
 hermes plugins enable foundry
+# Desktop half: enable it in Capabilities → Plugins (it ships opt-in),
+# then open the Foundry page from the sidebar.
 ```
 
 Catalog submission is a PR to `NousResearch/hermes-agent` pinning a full
