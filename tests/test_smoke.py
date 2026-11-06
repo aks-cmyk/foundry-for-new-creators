@@ -89,12 +89,23 @@ def main():
         money = bots.bursar_money(conn, draft_id=revised["id"], cost_cents=1000, revenue_cents=2500)
         check("bursar profit computed (2500-1000=1500)", money["payload"]["profit_cents"] == 1500)
 
-        # Durable store (fix 2026-11-06): outside Hermes, storage falls
-        # back to the local demo DB; inside Hermes it resolves to
+        # Durable store (fix 2026-11-06): where storage resolves depends
+        # on whether the Hermes `plugins` package is importable in this
+        # interpreter. Outside Hermes it falls back to the local demo DB;
+        # inside a Hermes env it resolves to
         # <home>/plugin-data/foundry/data.db (plugin_db's file). Checked
         # BEFORE set_db_path, which overrides the resolution (tests).
-        check("storage.db_path() falls back to local demo DB outside Hermes",
-              storage.db_path() == ROOT / "foundry" / "data" / "foundry.db")
+        try:
+            import plugins.plugin_storage  # noqa: F401
+            _hermes_storage = True
+        except Exception:
+            _hermes_storage = False
+        if _hermes_storage:
+            check("storage.db_path() resolves to plugin-data/foundry/data.db in Hermes",
+                  str(storage.db_path()).endswith("plugin-data/foundry/data.db"))
+        else:
+            check("storage.db_path() falls back to local demo DB outside Hermes",
+                  storage.db_path() == ROOT / "foundry" / "data" / "foundry.db")
 
         # Tools: JSON strings, never raise
         tools.set_db_path(db)
