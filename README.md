@@ -67,11 +67,14 @@ tests/test_smoke.py       # smoke test (no Hermes, no network)
 scripts/                  # seed.py, render_dashboard.py, demo.py
 ```
 
-## Install into Hermes (when ready — UNVERIFIED locally)
+## Install into Hermes
 
-The Hermes CLI (`hermes`) was **not** installed in this workspace, so the
-commands below are copied from the official docs and have **not** been run
-here. See `docs/RESEARCH.md`.
+Validated in the VM against Hermes **v0.23.0** (2026-11-06):
+`hermes plugins validate` 15/15 PASS, `hermes plugins doctor` PASS
+(8 tools). Full record: `docs/VALIDATION.md`. Live Scribe and live
+dashboard load are still UNVERIFIED — they need Amit's Mac Studio,
+where his real Hermes lives. See `docs/MAC_STUDIO_CHECK.md` for the
+exact steps.
 
 ```bash
 # copy the plugin into Hermes' plugin directory, then validate + doctor it
