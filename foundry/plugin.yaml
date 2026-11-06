@@ -23,7 +23,6 @@ provides_tools:
   - foundry_draft_approve
   - foundry_scorecard
   - foundry_money_summary
-  - foundry_dashboard_render
 python_dependencies: []
 config_schema:
   platform: {type: str, default: "x", description: "Default platform for drafts (MVP: x)"}

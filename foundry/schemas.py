@@ -60,12 +60,11 @@ FOUNDRY_MONEY_SUMMARY = {
                         "client": _str("Client name, default 'self'.")}, []),
 }
 
-FOUNDRY_DASHBOARD_RENDER = {
-    "name": "foundry_dashboard_render",
-    "description": "Render the Foundry three-tab dashboard (Proofing Table / Scorekeeper / Bursar) as HTML from the ledger.",
-    "parameters": _obj({}, []),
-}
-
+# NOTE (2026-11-06): foundry_dashboard_render was dropped — it imported
+# scripts/render_dashboard, which is not inside an installed plugin folder,
+# so the tool failed in a live install. Static rendering for demos lives in
+# scripts/render_dashboard.py (make demo); the live dashboards are served
+# by foundry/dashboard/plugin_api.py.
 ALL_SCHEMAS = [FOUNDRY_LEDGER_LIST, FOUNDRY_LEDGER_GET, FOUNDRY_DRAFT_CREATE,
                FOUNDRY_DRAFT_FEEDBACK, FOUNDRY_DRAFT_APPROVE, FOUNDRY_SCORECARD,
-               FOUNDRY_MONEY_SUMMARY, FOUNDRY_DASHBOARD_RENDER]
+               FOUNDRY_MONEY_SUMMARY]

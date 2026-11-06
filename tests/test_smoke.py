@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from foundry import bots, ledger, schemas, tools  # noqa: E402
+from foundry import bots, ledger, schemas, storage, tools  # noqa: E402
 import foundry as foundry_plugin  # noqa: E402  (package __init__ defines register())
 
 
@@ -89,12 +89,48 @@ def main():
         money = bots.bursar_money(conn, draft_id=revised["id"], cost_cents=1000, revenue_cents=2500)
         check("bursar profit computed (2500-1000=1500)", money["payload"]["profit_cents"] == 1500)
 
+        # Durable store (fix 2026-11-06): outside Hermes, storage falls
+        # back to the local demo DB; inside Hermes it resolves to
+        # <home>/plugin-data/foundry/data.db (plugin_db's file). Checked
+        # BEFORE set_db_path, which overrides the resolution (tests).
+        check("storage.db_path() falls back to local demo DB outside Hermes",
+              storage.db_path() == ROOT / "foundry" / "data" / "foundry.db")
+
         # Tools: JSON strings, never raise
         tools.set_db_path(db)
+        check("set_db_path() overrides the resolution for tools AND the API",
+              storage.db_path() == db)
         out = json.loads(tools.foundry_ledger_list({"kind": "draft"}))
         check("tool ledger_list returns JSON ok", out["ok"] and len(out["cards"]) >= 2)
         bad = json.loads(tools.foundry_ledger_get({"card_id": "nope"}))
         check("tool ledger_get error is JSON, not a raise", bad["ok"] is False)
+
+        # Dashboard backend POST /feedback (fix 2026-11-06): writes a real
+        # Revision Card + a revised draft, sharing the tools' database
+        # (tools._DB_PATH is the temp DB here, so the API sees it too).
+        from foundry.dashboard import plugin_api
+        # Router registration is only checkable when FastAPI is installed
+        # (it is a Hermes dependency; system Python here has none).
+        if plugin_api.router is not None:
+            check("plugin_api router has GET /cards, /summary and POST /feedback",
+                  {r.path for r in plugin_api.router.routes} >= {"/cards", "/summary", "/feedback"})
+        else:
+            check("plugin_api endpoints exist without FastAPI (router is None here)",
+                  callable(plugin_api.feedback) and callable(plugin_api.list_cards))
+        fb = plugin_api.feedback({"draft_id": "draft-002",
+                                  "feedback_type": "tweak",
+                                  "note": "sharper hook"})
+        check("POST /feedback tweak writes Revision Card + revised draft",
+              fb["ok"] and fb["revision"]["kind"] == "revision"
+              and fb["revised_draft"]["version"] == 3
+              and fb["revised_draft"]["payload"].get("generation") == "rule-based")
+        fb_bad = plugin_api.feedback({"draft_id": "draft-002",
+                                      "feedback_type": "tweak", "note": ""})
+        check("POST /feedback tweak without a note is an error, not a raise",
+              fb_bad["ok"] is False)
+        cards = plugin_api._read_cards()
+        check("plugin_api reads the same ledger the tools write",
+              len(cards) >= 10 and any(c["kind"] == "revision" for c in cards))
 
         # plugin.yaml tools == schemas == handlers
     # PyYAML is not a dependency — parse plugin.yaml minimally.
@@ -123,7 +159,8 @@ def main():
             self.skills[name] = path
     ctx = FakeCtx()
     foundry_plugin.register(ctx)
-    check("register() registers 8 tools", len(ctx.tools) == 8)
+    check("register() registers 7 tools (dashboard_render dropped 2026-11-06)",
+          len(ctx.tools) == 7)
     check("register() passes toolset='foundry' for all tools",
           set(ctx.toolsets.values()) == {"foundry"})
     check("register() registers foundry-creator skill", "foundry-creator" in ctx.skills)

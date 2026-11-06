@@ -8,12 +8,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import bots, ledger
+from . import bots, ledger, storage
 
-# Standalone demo path. In Hermes, replace with plugin_db("foundry")
-# (see docs/ARCHITECTURE.md). The path is overridable for tests.
-_DEFAULT_DB = Path(__file__).parent / "data" / "foundry.db"
-_DB_PATH = _DEFAULT_DB
+# Ledger location (fixed 2026-11-06): the durable store
+# plugin_db("foundry") -> <hermes home>/plugin-data/foundry/data.db,
+# via foundry.storage — never a file inside the plugin folder (update /
+# remove would delete it). The storage module owns the resolution, so
+# tool handlers and the dashboard backend can never drift apart.
+_DB_PATH = None  # kept for introspection; set_db_path() writes storage.
 
 # PluginContext bound by register() in __init__.py. None outside Hermes
 # (smoke tests, make demo) — Scribe then uses the rule-based rewrite.
@@ -46,10 +48,11 @@ def _llm_complete(messages: list) -> str | None:
 def set_db_path(path) -> None:
     global _DB_PATH
     _DB_PATH = Path(path)
+    storage.set_db_path(path)
 
 
 def _conn():
-    return ledger.connect(_DB_PATH)
+    return storage.connect()
 
 
 def _ok(data) -> str:
@@ -171,13 +174,13 @@ def foundry_money_summary(args, **kwargs):
                 "note": "Tax figures, where present, are tracking estimates only."})
 
 
-@_handler
-def foundry_dashboard_render(args, **kwargs):
-    from scripts.render_dashboard import render
-    out = render()
-    return _ok({"dashboard": str(out)})
-
-
+# NOTE (2026-11-06): the old foundry_dashboard_render tool was dropped.
+# It did `from scripts.render_dashboard import render`, but scripts/ lives
+# at the repo root, not inside an installed ~/.hermes/plugins/foundry/,
+# so the tool failed in a live install. The static render still exists
+# for demos via scripts/render_dashboard.py (make demo); the real
+# dashboard surface is foundry/dashboard/ (web) and foundry/desktop/
+# (Desktop GUI), served by plugin_api.py.
 HANDLERS = {
     "foundry_ledger_list": foundry_ledger_list,
     "foundry_ledger_get": foundry_ledger_get,
@@ -186,5 +189,4 @@ HANDLERS = {
     "foundry_draft_approve": foundry_draft_approve,
     "foundry_scorecard": foundry_scorecard,
     "foundry_money_summary": foundry_money_summary,
-    "foundry_dashboard_render": foundry_dashboard_render,
 }
