@@ -5,11 +5,15 @@ a real `ctx.llm` Scribe revision, and a live dashboard load — on Amit's
 Mac Studio, where his real Hermes lives.
 
 Status before this check (VM, 2026-11-06):
-- Hermes v0.23.0 installed in the VM; `hermes plugins validate` 15/15 PASS;
-  `hermes plugins doctor` PASS after fixing `register_tool(toolset="foundry")`.
-- Smoke test 23/23 PASS. Live Scribe wired via verified `ctx.llm` shape,
-  but never run against a real model. Lookout stays stubbed (no `ctx`
-  web-search surface in v0.23.0).
+- Hermes v0.23.0 installed in the VM; `hermes plugins validate` PASS
+  (16 checks, incl. the desktop-surface check); `hermes plugins doctor`
+  PASS (7 tools).
+- Smoke test 34/34 PASS. Ledger now lives at `plugin_db("foundry")`;
+  dashboard buttons are wired to a real `POST /feedback`; a Desktop
+  GUI half (`foundry/desktop/plugin.js`) is built — see step 5.
+- Live Scribe wired via verified `ctx.llm` shape, but never run
+  against a real model. Lookout stays stubbed (no `ctx` web-search
+  surface in v0.23.0).
 - Full record: `docs/VALIDATION.md`.
 
 ## 0. What you need
@@ -73,14 +77,30 @@ with the v2 hook "Your last 100 posts taught your tools nothing…".
 
 Report back: which tabs rendered, and anything blank / broken.
 
-## 5. What to send Zuzu
+## 5. Live Desktop load (new — the Desktop half)
+
+In the Hermes Desktop app:
+1. Open **Capabilities → Plugins**, find **Foundry**, flip it on.
+   (It ships opt-in, so it will be listed but off until you enable it.)
+2. Open the **Foundry** page from the sidebar. Expected: the same
+   three tabs — Proofing Table, Scorekeeper, Bursar — over the 9
+   seeded cards.
+3. On the Proofing Table, try **Tweak** with the note "sharper hook".
+   Expected: a v3 draft comes back on the board (no pop-up alert —
+   the old stubs are gone).
+
+Report back: did the Foundry page appear, which tabs rendered, and
+did Tweak return v3?
+
+## 6. What to send Zuzu
 
 - `hermes --version` output
 - validate + doctor output (pass/fail, tool count)
 - Scribe v3 result: `llm` or `rule-based`?
-- Dashboard: which tabs rendered?
+- Web dashboard: which tabs rendered?
+- Desktop: did the Foundry page appear, and did Tweak return v3?
 
-With those four answers, the last UNVERIFIED items close, and the
+With those five answers, the last UNVERIFIED items close, and the
 next step — GitHub repo + catalog PR + demo video + Typeform, only
 with Amit's go-ahead — can start. Deadline: Wed Nov 11, 2026,
 5 PM EST / 2 PM PST.
