@@ -3,16 +3,7 @@
 Foundry is an end-to-end creator plugin for Hermes Agent: a crew of five bots
 sharing **one structured memory ledger**, with a four-tab board
 (Proofing Table / Brand / Inspector / Paymaster) on the web dashboard **and** in
-the Desktop app. First run: say "foundry start" in chat — a short
-interview sets up your brand (only the first question is required);
-your brand lives in the Brand tab.
-
-It is the entry for the **Hermes Agent Plugin Hackathon** (announced Nov 4, 2026;
-submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
-
-> **Status: MVP scaffold, not a submission.** Nothing here has been submitted
-> anywhere. No catalog PR, no demo video, no Typeform — those need Amit's
-> go-ahead. See `docs/SPEC.md` and `docs/CHANGELOG.md`.
+the Desktop app. 
 
 ## The idea in one paragraph
 
@@ -25,10 +16,19 @@ without citing an Evidence Card. Feedback becomes a Revision Card.
 Performance and money write back, so the next cycle is smarter.
 A human approves anything public. Nothing auto-posts.
 
-Foundry is **not** Eden / Dan Koe. Different names, different design
-(workshop + ledger, not garden / brand board), different job: Foundry
-owns the money side and the memory between bots, which Eden-style
-content tools do not.
+## Enable and start
+
+First run: say "foundry start" in chat — a short
+interview sets up your brand (only the first question is required);
+your brand lives in the Brand tab.
+
+It is the entry for the **Hermes Agent Plugin Hackathon** (announced Nov 4, 2026;
+submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
+
+> **Status: MVP scaffold, not a submission.** Nothing here has been submitted
+> anywhere. No catalog PR, no demo video, no Typeform — those need Amit's
+> go-ahead. See `docs/SPEC.md` and `docs/CHANGELOG.md`.
+
 
 ## Quick start (no coding needed)
 
