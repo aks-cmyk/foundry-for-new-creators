@@ -14,7 +14,7 @@ Foundry is a workshop. Five bots — **Patternmaker** (interview),
 read and write the same versioned ledger cards. A draft cannot exist
 without citing an Evidence Card. Feedback becomes a Revision Card.
 Performance and money write back, so the next cycle is smarter.
-A human approves anything public. Nothing auto-posts.
+Nothing auto-posts — human approval is not yet implemented in this version, so nothing can be approved.
 
 ## Enable and start
 
@@ -25,9 +25,6 @@ your brand lives in the Brand tab.
 It is the entry for the **Hermes Agent Plugin Hackathon** (announced Nov 4, 2026;
 submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
 
-> **Status: MVP scaffold, not a submission.** Nothing here has been submitted
-> anywhere. No catalog PR, no demo video, no Typeform — those need Amit's
-> go-ahead. See `docs/SPEC.md` and `docs/CHANGELOG.md`.
 
 
 ## Quick start (no coding needed)
