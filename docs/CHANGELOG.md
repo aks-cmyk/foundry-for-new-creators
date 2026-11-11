@@ -114,6 +114,35 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Dashboard redesign — vertical card feed — 2026-11-11 (Amit's call)
+
+After the Tabs fix, the live dashboard rendered on Mac Studio (three
+tabs show). Amit's feedback: the Proofing Table showed only the latest
+draft ("shouldn't it show all?"), the approval buttons were not
+formatted properly, and a vertical card design mimicking a phone would
+be nicer. Redone in `foundry/dashboard/dist/index.js` (same file):
+- Proofing Table lists **all** drafts as a vertical card stack,
+  newest first (feed order); each card carries its own buttons.
+- Buttons laid out in a flex row with gaps; the disabled Approve
+  button's visible label is short ("Approval unavailable") with the
+  full reason in the title tooltip.
+- The page is a narrow centered column (max-width 560px) — a
+  phone-like feed; draft text wraps (`pre-wrap`) inside it.
+- Feedback is per-draft now (`sendFeedback(draftId, ...)`); each
+  card's Tweak/Reject acts on its own draft.
+- Scorekeeper/Bursar tabs use the same vertical stack.
+
+#### Verified (VM, Hermes v0.23.0, Python 3.12, 2026-11-11)
+- SSR render against the REAL host UI components, state seeded with
+  2 drafts + 1 performance + 1 money card: proofing renders both
+  drafts, v3 before v2; score and money tabs render. Harness
+  `/tmp/foundry-dashboard-ssr.mjs`.
+- `tests/test_memory.py` 5/5; `tests/test_integrity.py` 7/7; smoke
+  test 34/34; `hermes plugins validate` PASS 16/16;
+  `hermes plugins doctor` PASS 7 tools, 0 hooks.
+- Live re-test on Amit's Mac Studio pending (single file, same as
+  the Tabs fix delivery).
+
 ### Dashboard Tabs fix — 2026-11-11 (live blank-page root cause)
 
 First live run on Mac Studio (Nov 10, 2026): the Foundry tab loaded a

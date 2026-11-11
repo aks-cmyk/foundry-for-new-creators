@@ -273,3 +273,16 @@ Verification (VM, Hermes v0.23.0, 2026-11-11):
   the manifest list entirely (the isolated home had Foundry "not
   enabled" until this round).
 - Live re-test on Amit's Mac Studio still pending (fresh zip v3).
+
+### Redesign — vertical card feed (same evening, Amit's call)
+
+After the Tabs fix rendered live, Amit asked for all drafts (not
+just the latest), properly formatted buttons, and a vertical card
+design like a phone. `foundry/dashboard/dist/index.js` now lists all
+drafts newest-first in a vertical stack inside a narrow centered
+column (max-width 560px); each card has its own buttons in a flex row
+(disabled Approve shows "Approval unavailable", full reason in the
+title); feedback is per-draft. Verified by SSR against the real host
+UI components with seeded state (2 drafts render, v3 before v2;
+score/money tabs render); tests 12/12, smoke 34/34, validate 16/16,
+doctor 7 tools. Live re-test pending (single file).

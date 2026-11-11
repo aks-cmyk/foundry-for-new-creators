@@ -1,9 +1,12 @@
 /* Foundry dashboard UI — IIFE, React from the Hermes SDK only.
- * Live-load status: the first live run (Mac Studio, Nov 10, 2026) loaded a
- * blank page — root cause found in the host source: the host's Tabs is a
- * render-prop component, children(active, setActive); elements-as-children
- * threw on first render and unmounted the app. Fixed 2026-11-10 (render-prop
- * form below). Live re-test still pending.
+ * Live-load status: first live run (Mac Studio, Nov 10, 2026) loaded a
+ * blank page — root cause: the host's Tabs is a render-prop component,
+ * children(active, setActive); elements-as-children threw on first
+ * render and unmounted the app. Fixed 2026-11-10 (render-prop form
+ * below); live re-test Nov 10, 11:15 PM: renders, three tabs show.
+ * Redesign 2026-11-11 (Amit's call): Proofing Table lists ALL drafts
+ * as a vertical card stack, newest first — a phone-like feed in a
+ * narrow centered column; each card has its own laid-out buttons.
  * Component names are copied from the official dashboard guide.
  * Fallback: if /api/plugins/foundry/cards is unreachable, the page
  * shows the seeded demo cards embedded by render_dashboard.py.
@@ -42,18 +45,19 @@
     var drafts = cards.filter(function (c) { return c.kind === "draft"; });
     var perf = cards.filter(function (c) { return c.kind === "performance"; });
     var moneyCards = cards.filter(function (c) { return c.kind === "money"; });
-    var latest = drafts[drafts.length - 1];
     function setTab(t) { setState({ tab: t, cards: cards, error: error }); }
     // Human feedback — POST /feedback writes a real Revision Card (and,
     // for tweaks, a revised draft). Fixed 2026-11-06: these were
     // alert(...) placeholders. Tweak asks for a one-line note via
     // prompt(); Reject requires a reason the same way.
-    function sendFeedback(type, note) {
-      if (!latest) { return; }
+    // Each draft card sends its own feedback (draftId), so every version
+    // in the stack is reviewable, not just the latest.
+    function sendFeedback(draftId, type, note) {
+      if (!draftId) { return; }
       SDK.fetchJSON("/api/plugins/foundry/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draft_id: latest.id, feedback_type: type, note: note || "" })
+        body: JSON.stringify({ draft_id: draftId, feedback_type: type, note: note || "" })
       }).then(function (d) {
         if (!d || d.ok === false) { throw new Error((d && d.error) || "feedback failed"); }
         return SDK.fetchJSON("/api/plugins/foundry/cards");
@@ -65,31 +69,45 @@
     }
     // Approval is disabled (2026-11-11): no trusted human review
     // channel exists yet, so there is no approve action to send —
-    // the button below stays inert instead of erroring.
-    function doTweak() {
+    // the button below stays inert instead of erroring. Its visible
+    // label is short ("Approval unavailable"); the full reason stays
+    // in the title tooltip: "Approval unavailable — trusted human
+    // review not wired".
+    function doTweak(draftId) {
       var note = window.prompt("Tweak — one-line note for Scribe:", "sharper hook");
       if (note === null) { return; } // cancelled
-      sendFeedback("tweak", note);
+      sendFeedback(draftId, "tweak", note);
     }
-    function doReject() {
+    function doReject(draftId) {
       var note = window.prompt("Reject — reason required:", "");
       if (note === null || !note.trim()) { return; }
-      sendFeedback("reject", note);
+      sendFeedback(draftId, "reject", note);
     }
+    // One draft card: title/version/status, text (wraps in the narrow
+    // column), evidence, and its own buttons in a laid-out row.
+    function draftCard(d) {
+      return React.createElement(Card, { key: d.id },
+        React.createElement(CardHeader, null,
+          React.createElement(CardTitle, null, d.title + " — v" + d.version + " (" + d.status + ")")),
+        React.createElement(CardContent, null,
+          React.createElement("pre", { style: { whiteSpace: "pre-wrap", wordBreak: "break-word" } }, d.payload.text),
+          React.createElement("p", { className: "muted" }, "Evidence: " + (d.payload.evidence_ids || []).join(", ")),
+          React.createElement("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px" } },
+            React.createElement(Button, { disabled: true, title: "Approval unavailable — trusted human review not wired" }, "Approval unavailable"),
+            React.createElement(Button, { onClick: function () { doTweak(d.id); } }, "Tweak"),
+            React.createElement(Button, { onClick: function () { doReject(d.id); } }, "Reject")
+          )));
+    }
+    // Vertical stack, newest first — a phone-like feed.
+    var stackStyle = { display: "flex", flexDirection: "column", gap: "12px" };
     var body;
     if (tab === "proofing") {
-      body = latest ? React.createElement(Card, null,
-        React.createElement(CardHeader, null,
-          React.createElement(CardTitle, null, latest.title + " — v" + latest.version + " (" + latest.status + ")")),
-        React.createElement(CardContent, null,
-          React.createElement("pre", null, latest.payload.text),
-          React.createElement("p", { className: "muted" }, "Evidence: " + (latest.payload.evidence_ids || []).join(", ")),
-          React.createElement(Button, { disabled: true, title: "Approval unavailable — trusted human review not wired" }, "Approval unavailable — trusted human review not wired"),
-          React.createElement(Button, { onClick: doTweak }, "Tweak"),
-          React.createElement(Button, { onClick: doReject }, "Reject")
-        )) : React.createElement("p", null, "No drafts yet.");
+      // All drafts, newest on top (oldest first in the ledger, reversed).
+      var ordered = drafts.slice().reverse();
+      body = ordered.length ? React.createElement("div", { style: stackStyle },
+        ordered.map(draftCard)) : React.createElement("p", null, "No drafts yet.");
     } else if (tab === "score") {
-      body = React.createElement("div", null, perf.map(function (p) {
+      body = React.createElement("div", { style: stackStyle }, perf.map(function (p) {
         return React.createElement(Card, { key: p.id },
           React.createElement(CardContent, null,
             React.createElement("p", null, p.payload.draft_id + ": " + p.payload.views + " views, " + p.payload.reposts + " reposts"),
@@ -97,7 +115,7 @@
             React.createElement("p", { className: "muted" }, p.payload.verdict_reason + " (seeded, estimated)")));
       }));
     } else {
-      body = React.createElement("div", null, moneyCards.map(function (m) {
+      body = React.createElement("div", { style: stackStyle }, moneyCards.map(function (m) {
         return React.createElement(Card, { key: m.id },
           React.createElement(CardContent, null,
             React.createElement("p", null, m.title + ": cost " + money(m.payload.cost_cents || 0) +
@@ -111,7 +129,8 @@
     // #root). Fixed 2026-11-10: render-prop form; triggers get active + value.
     // (The official dashboard guide lists the component names but shows no
     // Tabs usage example — the Radix-style shape was assumed, wrongly.)
-    return React.createElement("div", { className: "foundry" },
+    // Phone-like feed: narrow centered column, cards stacked vertically.
+    return React.createElement("div", { className: "foundry", style: { maxWidth: "560px", margin: "0 auto", padding: "0 4px" } },
       React.createElement("h2", null, "Foundry — five bots, one ledger"),
       error ? React.createElement("p", { className: "muted" }, error) : null,
       React.createElement(Tabs, { defaultValue: "proofing" }, function (active, setActive) {
