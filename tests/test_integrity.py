@@ -89,6 +89,16 @@ class SeedFixtureTests(unittest.TestCase):
         self.assertEqual('unverified', rev['created_by'])
         self.assertEqual('unverified', rev['payload']['author'])
 
+    def test_seed_all_cards_labeled_demo(self):
+        # 2026-11-11: every seeded card is titled "Demo: …" and carries
+        # origin "seed" so no agent or viewer can mistake sample data
+        # for the user's own brand, drafts, or numbers.
+        seed = json.loads((ROOT / 'foundry/data/seed.json').read_text())
+        self.assertEqual(9, len(seed['cards']))
+        for c in seed['cards']:
+            self.assertTrue(c['title'].startswith('Demo: '), c['id'])
+            self.assertEqual('seed', c['payload'].get('origin'), c['id'])
+
     def test_static_render_labels_fixture_as_seeded_demo(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location(

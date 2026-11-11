@@ -222,7 +222,7 @@ Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
   Approve label, with no `approved` wording.
 
 ### Still NOT covered after adoption
-- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test pending. Live Desktop load — wired and statically verified only.
+- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test done Nov 10, 11:15 PM — tabs render (three tabs at the time; the redesign + Brand tab live re-test is still pending). Live Desktop load — wired and statically verified only.
 - **Trusted human approval — explicitly NOT provided.** Approval is
   disabled, not implemented. See `docs/APPROVAL_CHECKPOINT.md`.
 - **Scoped memory as a product capability** — module only; nothing
@@ -272,7 +272,7 @@ Verification (VM, Hermes v0.23.0, 2026-11-11):
   serves HTTP 200. Side finding: a not-enabled plugin is absent from
   the manifest list entirely (the isolated home had Foundry "not
   enabled" until this round).
-- Live re-test on Amit's Mac Studio still pending (fresh zip v3).
+- Live re-test on Amit's Mac Studio: done Nov 10, 11:15 PM — tabs render (three tabs at the time; the redesign + Brand tab live re-test is still pending).
 
 ### Fifth round — onboarding (foundry_start + Brand tab)
 
@@ -282,7 +282,7 @@ nobody could call, and the brand was invisible. `foundry_start`
 (seed/interview/dashboard-edit), draft guard refusing the demo
 brand, Brand tab on web + Desktop with a real edit form backed by
 POST /brand (new version, dashboard authorship, never "human").
-Verified: new tests/test_onboarding.py 13/13; full suite 25/25;
+Verified: new tests/test_onboarding.py 14/14; full suite 26/26;
 smoke 34/34; validate 16/16; doctor 8 tools; SSR renders all four
 tabs incl. the Brand tab. Live check pending on Mac Studio — the
 interview needs a live model (see docs/MAC_STUDIO_CHECK.md §6).
@@ -299,3 +299,65 @@ title); feedback is per-draft. Verified by SSR against the real host
 UI components with seeded state (2 drafts render, v3 before v2;
 score/money tabs render); tests 12/12, smoke 34/34, validate 16/16,
 doctor 7 tools. Live re-test pending (single file).
+
+### Sixth round — pre-origin demo fix (`e776ce2`, 2026-11-11)
+
+Amit's existing Mac install seeded identity-001 before origin marking
+existed, so its payload has no `origin` field — and the draft guard and
+`is_onboarded` treated a missing origin as a real brand. Fix: only
+origin `"interview"` or `"dashboard-edit"` counts as a real brand;
+missing origin is treated the same as `"seed"` by the guard and by
+`is_onboarded`; the Brand tab shows the demo banner and a `(demo)`
+label for a missing origin. Regression test added to
+tests/test_onboarding.py (14/14). Verified: full suite 26/26; smoke
+34/34; validate 16/16; doctor 8 tools, 0 hooks.
+
+### Seventh round — branding (`bd38cf8`, 2026-11-11)
+
+Amit picked Logo D — Constellation. The mark was finalized from the
+chosen sheet (deterministic crop, transparent background) as
+`foundry/assets/logo-constellation-dark.png` /
+`logo-constellation-light.png`, plus dark/light wordmark lockups
+(`logo-constellation-wordmark-dark/light.png`). `foundry/README.md`
+created (wordmark-light at top, quick start, rule-13 disclosures, MIT
+line). The dashboard header was deliberately NOT rebranded
+(`dist/index.js` untouched). Verified: full suite 26/26; smoke 34/34;
+validate 16/16; doctor 8 tools, 0 hooks.
+
+### Eighth round — interview timeout fix (`9eafe44`, 2026-11-11)
+
+Live check on Amit's Mac: the agent asked all nine interview
+questions up front; the turn timed out while he was typing and
+nothing was saved. Fix: the skill's step 1 is now an interview
+protocol — ask ONE question at a time, in order, never front-load all
+nine; complete `foundry_start` as soon as who_you_help is answered
+(that writes a real Identity Card immediately, so a dead turn loses
+nothing); keep asking one at a time, each complete carrying
+who_you_help + all answers so far and writing a new version; on
+resume, read the latest Identity Card first and ask only for what's
+missing; never treat the seeded demo identity (origin `"seed"`) as
+the user's voice. The `foundry_start` begin instruction carries the
+same protocol, and the skill's Proofing Table step no longer promises
+an approval step (approval is disabled). Verified: full suite 26/26;
+smoke 34/34; validate 16/16 (on a copy); doctor 8 tools, 0 hooks
+(isolated home re-synced).
+
+### Ninth round — demo labeling (`86b2a24`, 2026-11-11)
+
+Amit's follow-up to the timeout: seeded content should be labeled as
+Demo. It was only half-labeled — the demo identity carried origin
+`"seed"` and the Brand tab showed a demo banner, but the other eight
+seeded cards had no origin at all and plain titles, and
+`foundry_ledger_list` hid the origin even where it existed. Fix: every
+seeded card is now titled `Demo: …` and carries `"origin": "seed"` in
+its payload (`foundry/data/seed.json`); `foundry_ledger_list` returns
+`origin` and `demo` per card; the skill states demo cards are sample
+data. No dashboard-code change — the Proofing Tables render `d.title`,
+so the Demo titles show automatically. `foundry/README.md` gained
+"How a cycle flows" and "Demo content" sections; the root README's
+stale facts were fixed (four tabs, 8 tools, live Scribe verified).
+Known limit: the ledger lives in `plugin_db("foundry")`, which survives
+plugin updates — an existing install keeps its old seeded cards (old
+titles, no origin); the draft guard and Brand-tab banner still apply
+to them. Fresh installs get the labeled seed. Verified: full suite
+26/26; smoke 34/34; validate 16/16; doctor 8 tools, 0 hooks.

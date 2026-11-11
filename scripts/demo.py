@@ -12,4 +12,4 @@ if __name__ == "__main__":
     seed_main()
     out = render()
     print(f"Open in a browser: {out}")
-    print("Tabs: Proofing Table / Scorekeeper / Bursar. Try Tweak — sharper hook.")
+    print("Tabs: Proofing Table / Brand / Scorekeeper / Bursar. Try Tweak — sharper hook.")

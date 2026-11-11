@@ -62,9 +62,12 @@ Rules that make the crew a system, not a list:
 
 1. **Scribe cannot draft without citing an Evidence Card.** A claim
    with no source is cut, not hedged.
-2. **Feedback is a card, not a chat message.** Approve / Tweak /
-   Reject on the Proofing Table writes a Revision Card, linked to the
-   Draft Card. Scribe reads Revision Cards before writing v2.
+2. **Feedback is a card, not a chat message.** Tweak / Reject on
+   the Proofing Table writes a Revision Card, linked to the Draft
+   Card. Scribe reads Revision Cards before writing v2. Approve is
+   disabled — the approve tool and the approve feedback route error
+   before writing anything, so no Revision Card is ever written for
+   an approval.
 3. **Performance and money write back.** Scorekeeper and Bursar write
    Performance / Money Cards linked to the Draft Card. Lookout reads
    them next cycle and avoids dead angles; Scribe reads them and
@@ -82,7 +85,16 @@ Rules that make the crew a system, not a list:
    Scribe refuses to draft in the seeded demo brand's voice. The
    brand is visible and editable on the Brand tab. Without this the
    plugin is a skill with a dashboard — the interview is what makes
-   it a product.
+   it a product. The interview runs one question at a time, in order,
+   never front-loaded: the agent completes `foundry_start` as soon as
+   the first question (who you help) is answered, which writes a real
+   Identity Card immediately, so a dead turn loses nothing; each
+   further answer completes again with who_you_help + all answers so
+   far and writes a new version. On resume, the agent reads the
+   latest Identity Card first and asks only for what's missing.
+   (2026-11-11: fixed after a live check timed out mid-interview
+   with nothing saved — see `docs/CHANGELOG.md`, interview timeout
+   fix.)
 
 ## 4. Shared ledger — summary
 
@@ -95,10 +107,12 @@ One SQLite database, six card kinds, all versioned, all with provenance:
 - **Evidence Card** — topic, sources (≥2, with links), what is confirmed,
   what is not.
 - **Draft Card** — platform, format, text, evidence links, status
-  (`draft` / `in_review` / `approved` / `rejected` / `posted`),
-  version, supersedes.
+  (`draft` / `in_review` / `rejected` / `posted`; `approved` is
+  disabled — approval is disabled, so no draft can ever reach that
+  status), version, supersedes.
 - **Revision Card** — feedback type (`approve` / `tweak` / `reject`),
-  note, author (human), linked draft, applied in v(n+1) or not.
+  note, author (unverified — feedback is never recorded as human),
+  linked draft, applied in v(n+1) or not.
 - **Performance Card** — views, likes, reposts, replies, saves, and
   the Scorekeeper verdict: repeat / drop / retry-differently.
 - **Money Card** — costs (model/tool/time), revenue, profit, per post
@@ -120,8 +134,10 @@ One shell, four tabs, all reading the same ledger:
 - One card per draft, in its real format (X thread, numbered).
 - Under each draft: its Evidence Card (sources), its Money Card
   (cost so far), its version history (v1 → v2, what changed and why).
-- Feedback actions only: **Approve** / **Tweak** (one-line note) /
-  **Reject** (reason required). Optional inline edit.
+- Feedback actions only: **Approve** (disabled — the button is
+  disabled with an honest label, and the approve tool errors before
+  writing anything) / **Tweak** (one-line note) / **Reject**
+  (reason required). Optional inline edit.
 - On Tweak/Reject: Scribe returns a revised draft; the Revision Card
   is stored; the board updates. No full WYSIWYG editor in the MVP.
 

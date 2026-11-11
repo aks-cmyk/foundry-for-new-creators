@@ -7,7 +7,7 @@
 // .hermes-package.json marker and hot-reloads it.
 //
 // It mirrors the web-dashboard board (foundry/dashboard/dist/index.js):
-// Proofing Table / Scorekeeper / Bursar over the SAME backend,
+// Proofing Table / Brand / Scorekeeper / Bursar over the SAME backend,
 // reached via ctx.rest('/cards'), ctx.rest('/summary') and the POST
 // /feedback endpoint in foundry/dashboard/plugin_api.py — that backend
 // namespace is the one piece shared between the two SDKs.

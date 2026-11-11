@@ -101,7 +101,7 @@ Do not submit without Amit's go-ahead.
 
 ## Rules baked in
 
-- **Human approval on anything public.** No auto-post, no auto-send.
+- **Approval is disabled, not implemented.** There is no trusted human review channel yet, so the Approve buttons are disabled and the approve routes fail closed. Nothing auto-posts, auto-sends, or auto-buys. Ever.
 - **Tax tracking only.** Bursar categorises, estimates and exports.
   It gives no tax advice and files nothing.
 - **No invented facts.** Scribe drafts only from cited Evidence Cards;

@@ -153,7 +153,9 @@ Read-only, as the guide requires.
 4. Human, on the Proofing Table, writes Revision Card R1
    ("Tweak — sharper hook").
 5. Scribe writes Draft Card D2 (supersedes D1), citing E1 + R1.
-6. Human approves D2. Scorekeeper writes Performance Card P1.
+6. Human reviews D2 on the Proofing Table — tweak or reject
+   (approval is disabled: the approve routes fail closed and
+   nothing auto-posts). Scorekeeper writes Performance Card P1.
 7. Bursar writes Money Card M1 for D2 (costs, revenue, profit).
 8. Next cycle: Lookout reads P1 + M1 before writing E2.
 
@@ -170,9 +172,10 @@ Read-only, as the guide requires.
 | `plugin_data_dir` / `plugin_db` durable-state pattern | Verified from docs (exact import quoted) |
 | Catalog rules (SHA pin, validate, disclosures) | Verified from docs |
 | Ledger, bots, dashboard render, smoke test | Verified by running them here (see test output in report) |
-| `hermes plugins validate` / `doctor` on Foundry | **Verified** 2026-11-06: validate PASS (16 checks, incl. desktop surface), doctor PASS (7 tools) — see `docs/VALIDATION.md` |
-| `ctx.llm` live drafting; live search; live X/analytics | **Not implemented** in scaffold (stubs + seed) |
-| Dashboard bundle in a live `hermes dashboard` | **UNVERIFIED** |
+| `hermes plugins validate` / `doctor` on Foundry | **Verified** 2026-11-06, re-verified 2026-11-11: validate PASS (16 checks, incl. desktop surface), doctor PASS (8 tools) — see `docs/VALIDATION.md` |
+| `ctx.llm` live drafting | **Verified live** Nov 10, 2026 (Mac Studio): draft-003 produced with `generation: "llm"` |
+| live search; live X/analytics | **Not implemented** in scaffold (stubs + seed) |
+| Dashboard bundle in a live `hermes dashboard` | **Verified live** Nov 10, 2026, 11:15 PM — tabs render, after the Tabs render-prop fix (see `docs/VALIDATION.md`, Fourth round) |
 | Desktop half in a live `hermes desktop` | **Built, statically verified, UNVERIFIED live** (no Desktop app in this workspace) |
 | Ledger location | **Fixed** 2026-11-06: `plugin_db("foundry")` via `foundry/storage.py` |
 | Dashboard Approve/Tweak/Reject | **Fixed** 2026-11-06: real `POST /feedback` + revised draft |

@@ -113,6 +113,13 @@ def main():
               storage.db_path() == db)
         out = json.loads(tools.foundry_ledger_list({"kind": "draft"}))
         check("tool ledger_list returns JSON ok", out["ok"] and len(out["cards"]) >= 2)
+        by_id = {c["id"]: c for c in out["cards"]}
+        check("tool ledger_list surfaces origin/demo for seeded cards",
+              by_id["draft-001"]["demo"] is True and by_id["draft-001"]["origin"] == "seed"
+              and by_id["draft-002"]["demo"] is True and by_id["draft-002"]["origin"] == "seed")
+        check("tool ledger_list marks user-created drafts as not demo",
+              all(c["demo"] is False for c in out["cards"]
+                  if c["id"] not in ("draft-001", "draft-002")))
         bad = json.loads(tools.foundry_ledger_get({"card_id": "nope"}))
         check("tool ledger_get error is JSON, not a raise", bad["ok"] is False)
 
@@ -201,9 +208,15 @@ def main():
     from scripts.render_dashboard import render
     out_path = render()
     html_text = out_path.read_text()
-    check("dashboard renders with all three tabs",
-          all(t in html_text for t in ("Proofing Table", "Scorekeeper", "Bursar")))
+    check("dashboard renders with all four tabs",
+          all(t in html_text for t in ("Proofing Table", "Brand", "Scorekeeper", "Bursar")))
     check("dashboard shows seeded v2 hook", "Your last 100 posts taught your tools nothing" in html_text)
+    check("dashboard shows all drafts newest-first",
+          html_text.count("Demo: X thread draft") >= 2
+          and html_text.index("v2 (in_review)") < html_text.index("v1 (in_review)"))
+    check("dashboard Brand tab shows the demo brand",
+          "Help independent builders make a living" in html_text
+          and "demo brand" in html_text)
     check("dashboard labels seed as estimated", "estimated" in html_text)
 
     print("\nSMOKE TEST: all checks passed.")

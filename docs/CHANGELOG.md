@@ -1,7 +1,8 @@
 # Changelog
 
-All notable changes to Foundry, newest first. Format is
-`Keep a Changelog`-style; versions are SemVer.
+All notable changes to Foundry, oldest first — entries are appended
+at the end, newest last. Format is `Keep a Changelog`-style; versions
+are SemVer.
 
 ## [0.1.0] — 2026-11-06 — MVP scaffold
 
@@ -113,6 +114,30 @@ All notable changes to Foundry, newest first. Format is
   Full log: `hidden_files/validation-2026-11-06b.log`.
 
 ## [Unreleased]
+
+### Final review fixes — 2026-11-11 (pre-submission audit)
+
+A full-repo consistency review found the plugin code green and the
+docs/demo artifacts stale. Fixed in this round — no change to the
+shipped plugin code except the static render and its tests:
+- Static render (`scripts/render_dashboard.py`) upgraded to match
+  the live board: four tabs incl. a Brand tab (identity fields +
+  demo banner), Proofing Table lists all drafts newest-first with
+  per-draft feedback. The demo script's fallback claim ("same four
+  tabs") is now true.
+- Test coverage for demo labeling (the review's one coverage gap):
+  new integrity test asserts all 9 seeded cards are titled
+  `Demo: …` with origin `"seed"`; smoke test asserts
+  `ledger_list` returns origin/demo (seeded = demo, user-created =
+  not demo) and the render's four tabs / all-drafts order / Brand
+  tab. Suite now 27/27, smoke 38/38.
+- Docs reconciled: catalog-pr.md re-pinned to `86b2a24` (README +
+  known_issues + 14/14 fixed), VALIDATION.md rounds six–nine added,
+  ARCHITECTURE.md verification table + cycle step 6, MAC_STUDIO_CHECK
+  §4 four tabs, SPEC.md approval/author/status fixes, root README
+  approval bullet, two stale comments, CHANGELOG header.
+- Local demo DB re-seeded (`make seed`) so `dashboard/index.html`
+  shows the Demo titles.
 
 ### Demo labeling — 2026-11-11 (Amit's call)
 

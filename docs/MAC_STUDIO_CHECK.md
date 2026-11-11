@@ -2,7 +2,11 @@
 
 Purpose: close the last two UNVERIFIED items from the VM validation —
 a real `ctx.llm` Scribe revision, and a live dashboard load — on Amit's
-Mac Studio, where his real Hermes lives.
+Mac Studio, where his real Hermes lives. Both are now done: live Scribe
+verified Nov 10, 2026 (draft-003, `generation: "llm"`); live dashboard
+load verified Nov 10, 11:15 PM (tabs render). Remaining unverified:
+the Brand-tab live re-test, the Desktop load, and the draft-003
+correction (Amit has not yet picked an option — option 1 advised).
 
 Status before this check (VM, 2026-11-06):
 - Hermes v0.23.0 installed in the VM; `hermes plugins validate` PASS
@@ -46,9 +50,9 @@ hermes plugins doctor foundry --ci
 hermes plugins enable foundry
 ```
 
-Expected: validate PASS, doctor PASS with **8 tools registered**.
-(The count was 8 before the 2026-11-06 fix round dropped the
-`foundry_dashboard_render` tool, which failed in a live install.)
+Expected: validate PASS, doctor PASS with **8 tools registered** —
+the eighth is `foundry_start`, which restored the count to 8 after the
+2026-11-06 fix round dropped the broken `foundry_dashboard_render` tool.
 If doctor shows 0 tools, or validate fails, stop and send Zuzu the
 full output — do not work around it.
 
@@ -71,8 +75,8 @@ Report back: did v3 come back, and did it say `llm` or `rule-based`?
 hermes dashboard
 ```
 
-Open the Foundry tab. Expected: all three tabs render —
-Proofing Table, Scorekeeper, Bursar — over the 9 seeded cards,
+Open the Foundry tab. Expected: all four tabs render —
+Proofing Table, Brand, Scorekeeper, Bursar — over the 9 seeded cards,
 with the v2 hook "Your last 100 posts taught your tools nothing…".
 
 Report back: which tabs rendered, and anything blank / broken.
