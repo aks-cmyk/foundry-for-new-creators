@@ -132,6 +132,9 @@ no Brand tab. Built, no shortcuts:
   (demo data), `"interview"` (foundry_start), `"dashboard-edit"`
   (Brand tab save). `is_onboarded` is true once a non-seed brand
   exists. The seeded identity-001 is marked `"seed"` in seed.json.
+  Identities seeded before the origin field existed (no origin at
+  all — e.g. a live Mac Studio DB from Nov 10) count as demo too,
+  so the guard and the Brand tab treat them the same way.
 - **Draft guard.** `foundry_draft_create` refuses the seeded demo
   brand and points at `foundry_start`. Drafting with a real brand
   works unchanged; the demo and the tests call `bots.scribe_draft`

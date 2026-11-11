@@ -141,7 +141,7 @@ def foundry_draft_create(args, **kwargs):
     with _conn() as conn:
         identity = ledger.get_card(conn, args["identity_id"])
         if (identity is not None and identity["kind"] == "identity"
-                and identity["payload"].get("origin") == "seed"):
+                and identity["payload"].get("origin") not in ("interview", "dashboard-edit")):
             return _err("identity-001 is Foundry's demo brand, not yours. "
                         "Run foundry_start first — a short interview sets up "
                         "your own brand — then draft with the new Identity Card.")

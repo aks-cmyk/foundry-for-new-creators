@@ -67,10 +67,12 @@ def latest_identity(conn) -> dict | None:
 
 def is_onboarded(conn) -> bool:
     """True once a real brand exists — an Identity Card whose origin
-    is not the demo seed. The seeded identity-001 is demo data, not
-    the user's brand."""
+    is "interview" or "dashboard-edit". The seeded demo identity has
+    origin "seed"; identities seeded before the origin field existed
+    have no origin at all and count as demo too — only a card written
+    by foundry_start or a Brand-tab save is a real brand."""
     ident = latest_identity(conn)
-    return ident is not None and ident["payload"].get("origin") != "seed"
+    return ident is not None and ident["payload"].get("origin") in ("interview", "dashboard-edit")
 
 
 def lookout_evidence(conn, *, topic: str, sources: list[dict],

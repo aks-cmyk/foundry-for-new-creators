@@ -198,8 +198,8 @@ function FoundryPage({ rest }) {
         ['Never use', joinList(p.voice_donts)]
       ]
       body = jsxs('div', { style: cardStyle, children: [
-        jsx('h3', { children: 'Brand — v' + identity.version + ' (' + (p.origin || 'unknown') + ')' }),
-        p.origin === 'seed' ? jsx('p', { style: mutedStyle, children: "This is Foundry's demo brand. Say 'foundry start' in chat to set up your own — or edit it here." }) : null,
+        jsx('h3', { children: 'Brand — v' + identity.version + ' (' + (p.origin || 'demo') + ')' }),
+        (p.origin === 'seed' || !p.origin) ? jsx('p', { style: mutedStyle, children: "This is Foundry's demo brand. Say 'foundry start' in chat to set up your own — or edit it here." }) : null,
         jsxs('div', { children: rows.map(function (r) {
           return jsx('p', { key: r[0], children: [jsx('strong', { key: 'l', children: r[0] + ': ' }), r[1] || '—'] })
         }) }),

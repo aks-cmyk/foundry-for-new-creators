@@ -144,6 +144,27 @@ class OnboardingTests(unittest.TestCase):
         finally:
             conn.close()
 
+    def test_pre_origin_identity_counts_as_demo(self):
+        # Installs seeded before the origin field existed (e.g. a live
+        # Mac Studio DB from Nov 10) carry no origin — they are demo
+        # brands too, so the guard and the onboarded check must treat
+        # a missing origin the same as "seed".
+        conn = ledger.connect(self.db)
+        try:
+            ledger.create_card(conn, id="identity-000", kind="identity", version=1,
+                               lineage="identity-000", title="Identity Card",
+                               status="active",
+                               payload={"who_you_help": "Old demo brand"},
+                               created_by="cartographer")
+            self.assertFalse(bots.is_onboarded(conn))
+        finally:
+            conn.close()
+        out = self._call(tools.foundry_draft_create, {
+            "evidence_id": "evidence-001", "identity_id": "identity-000",
+            "hook": "Hook", "body": ["Body"]})
+        self.assertFalse(out["ok"])
+        self.assertIn("foundry_start", out["error"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

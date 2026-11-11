@@ -156,7 +156,7 @@
         return React.createElement("p", null, "No brand yet. Say 'foundry start' in chat — a short interview sets up your brand.");
       }
       var p = identity.payload;
-      var isDemo = p.origin === "seed";
+      var isDemo = p.origin === "seed" || !p.origin;
       var rows = [
         ["Who you help", p.who_you_help],
         ["Audience", p.audience],
@@ -170,7 +170,7 @@
       ];
       return React.createElement(Card, null,
         React.createElement(CardHeader, null,
-          React.createElement(CardTitle, null, "Brand — v" + identity.version + " (" + (p.origin || "unknown") + ")")),
+          React.createElement(CardTitle, null, "Brand — v" + identity.version + " (" + (p.origin || "demo") + ")")),
         React.createElement(CardContent, null,
           isDemo ? React.createElement("p", { className: "muted" }, "This is Foundry's demo brand. Say 'foundry start' in chat to set up your own — or edit it here.") : null,
           rows.map(function (r) {
