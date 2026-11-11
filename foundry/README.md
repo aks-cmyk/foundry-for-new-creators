@@ -7,10 +7,35 @@ draft, score, and price your work — and remember what worked. Built
 for the **Hermes Agent Plugin Hackathon** (Nov 2026).
 
 **Start here: say "foundry start" in chat.** A short interview sets
-up your brand (only the first question is required). Your brand lives
-in the **Brand** tab on the dashboard, where you can view and edit it
-any time. Drafting refuses the seeded demo brand until you have your
-own.
+up your brand (only the first question is required). Answer one
+question at a time — your brand is saved as soon as the first
+answer lands, and you can resume anytime by saying "foundry start"
+again. Your brand lives in the **Brand** tab on the dashboard,
+where you can view and edit it any time. Drafting refuses the
+seeded demo brand until you have your own.
+
+## How a cycle flows
+
+1. **Cartographer** interviews you → Identity Card (your brand).
+2. **Lookout** finds sourced evidence → Evidence Card (at least 2
+   sources with links; unconfirmed claims are dropped).
+3. **Scribe** drafts from cited Evidence Cards only, in your
+   brand's voice → Draft Card.
+4. **Proofing Table** — you tweak (one-line note) or reject (reason);
+   feedback becomes a Revision Card and Scribe returns a new
+   version. Approval is disabled, so nothing posts from this flow.
+5. **Scorekeeper** and **Bursar** record performance and money for
+   the same draft; the next cycle learns from them.
+
+## Demo content
+
+The ledger ships with demo cards — titled `Demo: …`, origin `seed`
+— so the board isn't empty on first open. They're sample data: a
+fictional brand ("three small tools"), illustrative numbers
+(performance is labelled `estimated`). Never your voice, never your
+numbers. The draft guard refuses the demo brand, and the agent
+treats demo cards as samples, not sources. On a fresh install they
+are the only cards until you run `foundry_start`.
 
 ## The crew
 

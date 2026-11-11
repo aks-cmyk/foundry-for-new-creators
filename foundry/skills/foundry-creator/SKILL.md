@@ -18,6 +18,9 @@ never invent facts, numbers, quotes or sources.
    (origin `"seed"` — the "three small tools" story) as the user's
    voice: if the ledger only has the demo card, the interview must
    run before any drafting (the draft guard refuses the demo brand).
+   Every seeded demo card is titled `Demo: …` and carries origin
+   `"seed"` — treat all of them as sample data, never as the user's
+   voice, numbers, or sources.
 2. **Lookout (research).** Find sourced evidence in the niche.
    An Evidence Card needs at least 2 sources with links. Drop any
    claim you cannot confirm with a link.

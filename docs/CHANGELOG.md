@@ -114,6 +114,32 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Demo labeling — 2026-11-11 (Amit's call)
+
+Amit's follow-up to the interview timeout: seeded content should be
+labeled as Demo. It was only half-labeled — the demo identity
+carried origin `"seed"` and the Brand tab showed a demo banner, but
+the other eight seeded cards had no origin at all and plain titles,
+and `foundry_ledger_list` hid the origin even where it existed, so
+the agent had to infer demo-ness. Fixed:
+- Every seeded card is now titled `Demo: …` and carries
+  `"origin": "seed"` in its payload (`foundry/data/seed.json`).
+  User-created cards keep plain titles (`Identity Card`,
+  `X thread draft`), so the distinction is visible everywhere the
+  title renders — web dashboard and Desktop Proofing Tables show
+  it with no dashboard-code change (they render `d.title`).
+- `foundry_ledger_list` now returns `origin` and `demo`
+  (`origin == "seed"`) per card, so the agent sees sample data
+  without a full get on each card.
+- The skill states it plainly: all `Demo: …` / origin-`"seed"`
+  cards are sample data, never the user's voice, numbers, or
+  sources.
+- Known limit: the ledger lives in `plugin_db("foundry")`, which
+  survives plugin updates — an existing install keeps its old
+  seeded cards (old titles, no origin). The draft guard and the
+  Brand-tab banner still apply to them. Fresh installs get the
+  labeled seed.
+
 ### Interview timeout fix — 2026-11-11 (live check on Amit's Mac)
 
 Amit ran `foundry_start` on his Mac: the agent asked for every

@@ -1,9 +1,11 @@
 # Foundry — a creator plugin for Hermes Agent
 
 Foundry is an end-to-end creator plugin for Hermes Agent: a crew of five bots
-sharing **one structured memory ledger**, with a three-tab board
-(Proofing Table / Scorekeeper / Bursar) on the web dashboard **and** in
-the Desktop app.
+sharing **one structured memory ledger**, with a four-tab board
+(Proofing Table / Brand / Scorekeeper / Bursar) on the web dashboard **and** in
+the Desktop app. First run: say "foundry start" in chat — a short
+interview sets up your brand (only the first question is required);
+your brand lives in the Brand tab.
 
 It is the entry for the **Hermes Agent Plugin Hackathon** (announced Nov 4, 2026;
 submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
@@ -75,10 +77,12 @@ scripts/                  # seed.py, render_dashboard.py, demo.py
 
 Validated in the VM against Hermes **v0.23.0** (2026-11-06):
 `hermes plugins validate` PASS (16 checks, incl. the desktop-surface
-check), `hermes plugins doctor` PASS (7 tools). Smoke test 34/34.
-Full record: `docs/VALIDATION.md`. Live Scribe, live web-dashboard
-load, and live Desktop load are still UNVERIFIED — they need Amit's
-Mac Studio, where his real Hermes lives. See
+check), `hermes plugins doctor` PASS (8 tools). Smoke test 34/34.
+Full record: `docs/VALIDATION.md`. Live Scribe verified on Mac Studio
+(Nov 10, 2026): draft-003 produced with `generation: "llm"`. Live
+web-dashboard tabs confirmed rendering on Mac Studio (Nov 10, after
+the Tabs render-prop fix); the vertical-feed redesign + Brand tab
+live re-test is pending. Live Desktop load still pending. See
 `docs/MAC_STUDIO_CHECK.md` for the exact steps.
 
 ```bash

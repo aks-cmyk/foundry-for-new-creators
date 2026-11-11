@@ -130,7 +130,17 @@ def foundry_start(args, **kwargs):
 def foundry_ledger_list(args, **kwargs):
     with _conn() as conn:
         cards = ledger.list_cards(conn, kind=args.get("kind"), status=args.get("status"))
-    return _ok({"cards": [{k: c[k] for k in ("id", "kind", "version", "title", "status", "created_by")} for c in cards]})
+    summaries = []
+    for c in cards:
+        # Seeded demo cards carry origin "seed" — surface it (and the
+        # demo flag) so the agent can tell sample data from the user's
+        # own cards without a full get on each one.
+        origin = (c.get("payload") or {}).get("origin")
+        summaries.append({"id": c["id"], "kind": c["kind"],
+                          "version": c["version"], "title": c["title"],
+                          "status": c["status"], "created_by": c["created_by"],
+                          "origin": origin, "demo": origin == "seed"})
+    return _ok({"cards": summaries})
 
 
 @_handler
