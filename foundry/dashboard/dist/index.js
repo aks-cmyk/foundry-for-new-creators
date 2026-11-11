@@ -1,5 +1,9 @@
 /* Foundry dashboard UI — IIFE, React from the Hermes SDK only.
- * UNVERIFIED: not yet loaded in a live `hermes dashboard`.
+ * Live-load status: the first live run (Mac Studio, Nov 10, 2026) loaded a
+ * blank page — root cause found in the host source: the host's Tabs is a
+ * render-prop component, children(active, setActive); elements-as-children
+ * threw on first render and unmounted the app. Fixed 2026-11-10 (render-prop
+ * form below). Live re-test still pending.
  * Component names are copied from the official dashboard guide.
  * Fallback: if /api/plugins/foundry/cards is unreachable, the page
  * shows the seeded demo cards embedded by render_dashboard.py.
@@ -101,15 +105,23 @@
               " · profit " + money(m.payload.profit_cents || 0))));
       }));
     }
+    // The host's Tabs is a render-prop component: children(active, setActive).
+    // Passing elements as children throws "children is not a function" on
+    // first render and unmounts the whole dashboard (blank page, empty
+    // #root). Fixed 2026-11-10: render-prop form; triggers get active + value.
+    // (The official dashboard guide lists the component names but shows no
+    // Tabs usage example — the Radix-style shape was assumed, wrongly.)
     return React.createElement("div", { className: "foundry" },
       React.createElement("h2", null, "Foundry — five bots, one ledger"),
       error ? React.createElement("p", { className: "muted" }, error) : null,
-      React.createElement(Tabs, null,
-        React.createElement(TabsList, null,
-          React.createElement(TabsTrigger, { onClick: function () { setTab("proofing"); } }, "Proofing Table"),
-          React.createElement(TabsTrigger, { onClick: function () { setTab("score"); } }, "Scorekeeper"),
-          React.createElement(TabsTrigger, { onClick: function () { setTab("money"); } }, "Bursar"))),
-      body);
+      React.createElement(Tabs, { defaultValue: "proofing" }, function (active, setActive) {
+        return React.createElement("div", null,
+          React.createElement(TabsList, null,
+            React.createElement(TabsTrigger, { active: tab === "proofing", value: "proofing", onClick: function () { setTab("proofing"); } }, "Proofing Table"),
+            React.createElement(TabsTrigger, { active: tab === "score", value: "score", onClick: function () { setTab("score"); } }, "Scorekeeper"),
+            React.createElement(TabsTrigger, { active: tab === "money", value: "money", onClick: function () { setTab("money"); } }, "Bursar")),
+          body);
+      }));
   }
   window.__HERMES_PLUGINS__.register("foundry", FoundryPage);
 })();

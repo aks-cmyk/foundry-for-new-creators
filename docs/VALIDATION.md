@@ -222,9 +222,7 @@ Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
   Approve label, with no `approved` wording.
 
 ### Still NOT covered after adoption
-- Live Scribe via `ctx.llm`, live web dashboard load, live Desktop
-  load — wired and statically verified only; the Mac Studio live
-  check never completed.
+- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test pending. Live Desktop load — wired and statically verified only.
 - **Trusted human approval — explicitly NOT provided.** Approval is
   disabled, not implemented. See `docs/APPROVAL_CHECKPOINT.md`.
 - **Scoped memory as a product capability** — module only; nothing
@@ -236,3 +234,42 @@ Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
 - Typeform fields — still unverified (JS-rendered form).
 - `requires_hermes >=0.21.5` — docs' example floor, not a bisected
   minimum.
+
+## Fourth round — dashboard Tabs fix (2026-11-11)
+
+Symptom (Mac Studio, Nov 10, 2026): `hermes dashboard` → Foundry tab
+loads a blank page; page HTML only `<div id="root"></div>`, no console
+errors seen. The tab itself registered (manifest read, route exists).
+
+Root cause (host source, `.hermes-src`): the host's `Tabs`
+(`@nous-research/ui`, `web/src/plugins/registry.ts`) is a render-prop
+component — `children(active, setActive)` — while
+`foundry/dashboard/dist/index.js` passed elements as children
+(Radix-style, assumed from the component names; the official dashboard
+guide lists the names but shows no Tabs usage example). First render
+throws `children is not a function`, which unmounts the whole dashboard
+app — hence blank page + empty root. Every other component used
+(Card, Button, Badge, TabsList, TabsTrigger) matches the host exactly.
+
+Fix: `Tabs` now uses the render-prop form (`defaultValue: "proofing"`);
+triggers get `active` + `value`. The component's own tab state still
+drives which body renders. Static render unaffected (plain HTML).
+
+Verification (VM, Hermes v0.23.0, 2026-11-11):
+- Old code reproduced the exact throw in a server-side render against
+  the REAL host UI components (`RENDER THREW: children is not a
+  function`); fixed code renders (`RENDER OK`, Proofing Table trigger
+  active). Harness `/tmp/foundry-dashboard-ssr.mjs` (Node 24,
+  React 19.3.0, real `@nous-research/ui` dist). Effects don't run in
+  SSR, so this proves the first-render path; the data-loaded branch
+  uses the same Tabs element plus plain Card/Button/Badge.
+- `tests/test_memory.py` 5/5; `tests/test_integrity.py` 7/7; smoke
+  34/34; `hermes plugins validate` PASS 16/16;
+  `hermes plugins doctor` PASS 7 tools, 0 hooks (isolated
+  `HERMES_HOME`).
+- Server-side chain in the VM: after `hermes plugins enable foundry`
+  + rescan, `/api/dashboard/plugins` lists `foundry` and the entry
+  serves HTTP 200. Side finding: a not-enabled plugin is absent from
+  the manifest list entirely (the isolated home had Foundry "not
+  enabled" until this round).
+- Live re-test on Amit's Mac Studio still pending (fresh zip v3).

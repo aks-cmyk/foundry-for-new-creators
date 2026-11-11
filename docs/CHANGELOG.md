@@ -114,6 +114,44 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Dashboard Tabs fix — 2026-11-11 (live blank-page root cause)
+
+First live run on Mac Studio (Nov 10, 2026): the Foundry tab loaded a
+blank page, empty `#root`, no console errors seen. Root cause, found by
+reading the host source (`web/src/plugins/registry.ts` + the real
+`@nous-research/ui` Tabs): the host's `Tabs` is a **render-prop**
+component — `children(active, setActive)` — while
+`foundry/dashboard/dist/index.js` passed elements as children, the
+Radix-style shape. That throws `children is not a function` on first
+render and unmounts the whole dashboard app. The official dashboard
+guide lists the component names but shows no Tabs usage example; the
+Radix shape was assumed, wrongly. (The SDK globals and every other
+component used — Card, Button, Badge, TabsList, TabsTrigger — match the
+host exactly; only `Tabs`' children contract differed.)
+
+#### Fixed
+- `foundry/dashboard/dist/index.js`: `Tabs` now uses the render-prop
+  form (`defaultValue: "proofing"`, `children(active, setActive)`);
+  triggers get `active` + `value` props. The component's own tab state
+  still drives which body renders. The static render
+  (`scripts/render_dashboard.py`) is unaffected — plain HTML, no SDK Tabs.
+
+#### Verified (VM, Hermes v0.23.0, Python 3.12, 2026-11-11)
+- Old code reproduced the throw in a server-side render against the
+  REAL host UI components: `RENDER THREW: children is not a function`.
+  Fixed code renders: `RENDER OK` (Proofing Table trigger active).
+  Harness: `/tmp/foundry-dashboard-ssr.mjs` (Node 24, React 19.3.0,
+  real `@nous-research/ui` dist).
+- `tests/test_memory.py` 5/5; `tests/test_integrity.py` 7/7; smoke
+  test 34/34; `hermes plugins validate` PASS 16/16;
+  `hermes plugins doctor` PASS 7 tools, 0 hooks (isolated
+  `HERMES_HOME`, real `~/.hermes` untouched).
+- Server-side chain confirmed in the VM: plugin enabled → manifest
+  list includes `foundry` → entry serves HTTP 200. (Side finding: an
+  un-enabled plugin is absent from `/api/dashboard/plugins` entirely
+  — the isolated home had Foundry "not enabled" until now.)
+- Live re-test on Amit's Mac Studio still pending (fresh zip v3).
+
 ### Adopted 2026-11-11 — Mac Studio integrity + scoped-memory work (candidate bde3c03)
 
 Adopted as `d257c2b`; fixture fixes as `4948d7f`. The Mac Studio
@@ -157,11 +195,10 @@ identity that must never go public).
 - Full logs: `hidden_files/adoption-2026-11-10/`.
 
 #### Known gaps (not yet done)
-- **LICENSE / copyright holder: OPEN, needs Amit's decision.**
-  `plugin.yaml` claims `license: MIT` but there is no LICENSE file
-  and no copyright holder anywhere in the tree. Do not invent one.
-- Live Scribe via `ctx.llm`, live web dashboard load, live Desktop
-  load: still unverified (Mac Studio live check never completed).
+- **LICENSE / copyright holder: DECIDED Nov 10, 2026** — MIT,
+  Copyright (c) 2026 Amit Srivastava; LICENSE file added (commit
+  `8279a3c`).
+- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio (draft-003, `generation: "llm"`, Nov 10, 2026); the draft-003 correction (back to Foundry framing) is pending Amit's pick. Live web dashboard load: blank page on first run, root cause found + fixed (Tabs render-prop, see top of this section) — live re-test pending. Live Desktop load: still unverified.
 - Trusted human approval: explicitly not provided (see above).
 - Lookout live search (needs a `ctx` surface or MCP route — none
   verified); Scorekeeper/Bursar live analytics + money imports;
