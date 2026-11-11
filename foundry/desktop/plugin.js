@@ -95,11 +95,13 @@ function FoundryPage({ rest }) {
         onChange: function (e) { setNote(e.target.value) }
       }),
       jsxs('div', { children: [
-        jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback('approve') }, children: 'Approve' }),
+        // Approval is disabled (2026-11-11): no trusted human review
+        // channel exists yet — the button stays inert, not an error.
+        jsx('button', { style: btnStyle, disabled: true, title: 'Approval unavailable — trusted human review not wired', children: 'Approval unavailable — trusted human review not wired' }),
         jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback('tweak') }, children: 'Tweak' }),
         jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback('reject') }, children: 'Reject' })
       ] }),
-      jsx('p', { style: mutedStyle, children: 'Human approval on anything public; nothing auto-posts. Tweak sends the note to Scribe and returns a new draft version — the original is never changed.' })
+      jsx('p', { style: mutedStyle, children: 'Approval is disabled — no trusted human review channel yet. Nothing auto-posts. Tweak sends the note to Scribe and returns a new draft version — the original is never changed; feedback is recorded as unverified.' })
     ] }) : jsx('p', { children: 'No drafts yet.' })
   } else if (tab === 'score') {
     body = jsxs('div', { children: perf.map(function (p) {

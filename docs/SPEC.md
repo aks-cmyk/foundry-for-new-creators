@@ -70,7 +70,10 @@ Rules that make the crew a system, not a list:
    them next cycle and avoids dead angles; Scribe reads them and
    repeats winning formats.
 4. **A human is the editor.** Drafts are drafts until a human approves
-   them on the Proofing Table. Nothing posts itself.
+   them on the Proofing Table. Nothing posts itself. (Currently
+   disabled — 2026-11-11: the approve routes fail closed until a
+   trusted human review channel exists; see
+   `docs/APPROVAL_CHECKPOINT.md`.)
 
 ## 4. Shared ledger — summary
 
@@ -162,8 +165,8 @@ no content-only tool can surface.
 | `foundry_ledger_list` | List ledger cards, filtered by kind / status |
 | `foundry_ledger_get` | Get one card (with its links) by id |
 | `foundry_draft_create` | Scribe: create a Draft Card from an Evidence Card + Identity Card |
-| `foundry_draft_feedback` | Record a Revision Card (approve / tweak / reject) and, on tweak, return a revised draft |
-| `foundry_draft_approve` | Mark a Draft Card approved (human approval gate) |
+| `foundry_draft_feedback` | Record a Revision Card (tweak / reject) and, on tweak, return a revised draft; approve is disabled (no trusted human review channel yet) |
+| `foundry_draft_approve` | Approval is disabled — always errors until a trusted human review channel exists |
 | `foundry_scorecard` | Scorekeeper summary for a draft / period |
 | `foundry_money_summary` | Bursar P&L for a draft / client / period |
 

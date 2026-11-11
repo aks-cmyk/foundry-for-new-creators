@@ -193,8 +193,8 @@ Status: `draft` | `final`.
 - `identity-001` v1 — Cartographer, "Creator who helps builders…"
 - `evidence-001` v1 — Lookout, 2 sources, topic "creator tools forget"
 - `draft-001` v1 — Scribe, cites `evidence-001`, status `in_review`
-- `revision-001` — human, `tweak`, "sharper hook", applied in `draft-002`
-- `draft-002` v2 — Scribe, supersedes `draft-001`, status `approved`
+- `revision-001` — unverified author (seeded demo data, not a real human review), `tweak`, "sharper hook", applied in `draft-002`
+- `draft-002` v2 — Scribe, supersedes `draft-001`, status `in_review` (seeded demo data; approval is disabled — no trusted human review channel yet)
 - `performance-001` — Scorekeeper, measures `draft-002`, verdict `repeat`
 - `money-001` — Bursar, prices `draft-002`, profit computed from seed costs
 - `money-002` — Bursar, partnership record, one seeded deal, status `terms`

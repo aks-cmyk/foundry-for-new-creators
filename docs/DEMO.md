@@ -17,7 +17,7 @@ Record the dashboard + one Hermes chat turn. No slides.
 | 10–35s | "Lookout brings back sourced evidence. Scribe drafts from it — nothing without a citation." | Evidence Card (2 sources) → Draft v1 on the Proofing Table. Point at the citations under the draft. |
 | 35–60s | "Here's the human moment. Sharper hook." | Click **Tweak**, type "sharper hook". Scribe returns v2. Show v1 → v2 diff and the Revision Card that stored the feedback. |
 | 60–80s | "Scorekeeper says this format worked. Bursar says it made money after costs. Same post, one view." | Scorekeeper tab (verdict: repeat) → Bursar tab (cost, revenue, profit on the same draft). |
-| 80–90s | "Five bots, one ledger. Foundry." | Back to Proofing Table, approved draft. End card: name + "Hermes Agent Plugin Hackathon". |
+| 80–90s | "Five bots, one ledger. Foundry." | Back to Proofing Table, draft v2 (in review — seeded demo data). End card: name + "Hermes Agent Plugin Hackathon". |
 
 ## What not to do
 

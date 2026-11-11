@@ -59,7 +59,9 @@
         setState({ tab: tab, cards: cards, error: "Feedback failed: " + (e.message || e) });
       });
     }
-    function doApprove() { sendFeedback("approve", ""); }
+    // Approval is disabled (2026-11-11): no trusted human review
+    // channel exists yet, so there is no approve action to send —
+    // the button below stays inert instead of erroring.
     function doTweak() {
       var note = window.prompt("Tweak — one-line note for Scribe:", "sharper hook");
       if (note === null) { return; } // cancelled
@@ -78,7 +80,7 @@
         React.createElement(CardContent, null,
           React.createElement("pre", null, latest.payload.text),
           React.createElement("p", { className: "muted" }, "Evidence: " + (latest.payload.evidence_ids || []).join(", ")),
-          React.createElement(Button, { onClick: doApprove }, "Approve"),
+          React.createElement(Button, { disabled: true, title: "Approval unavailable — trusted human review not wired" }, "Approval unavailable — trusted human review not wired"),
           React.createElement(Button, { onClick: doTweak }, "Tweak"),
           React.createElement(Button, { onClick: doReject }, "Reject")
         )) : React.createElement("p", null, "No drafts yet.");

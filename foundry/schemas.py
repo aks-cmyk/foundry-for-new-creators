@@ -34,7 +34,7 @@ FOUNDRY_DRAFT_CREATE = {
 
 FOUNDRY_DRAFT_FEEDBACK = {
     "name": "foundry_draft_feedback",
-    "description": "Record human feedback on a draft (approve / tweak / reject with a one-line note). On tweak, Scribe returns a revised draft as a new version; the original is never changed.",
+    "description": "Record feedback on a draft (tweak / reject with a one-line note; approve is disabled — no trusted human review channel yet). On tweak, Scribe returns a revised draft as a new version; the original is never changed. Feedback is recorded as unverified, never as human authorship.",
     "parameters": _obj({"draft_id": _str("Draft Card id."),
                         "feedback_type": _str("approve, tweak, or reject."),
                         "note": _str("One-line note, e.g. 'sharper hook'. Required for tweak/reject.")},
@@ -43,7 +43,7 @@ FOUNDRY_DRAFT_FEEDBACK = {
 
 FOUNDRY_DRAFT_APPROVE = {
     "name": "foundry_draft_approve",
-    "description": "Human approval gate: mark a Draft Card approved. Nothing posts until a human approves it.",
+    "description": "Approval is currently disabled — no trusted human review channel exists yet, so this tool always returns an error. Nothing auto-posts.",
     "parameters": _obj({"draft_id": _str("Draft Card id.")}, ["draft_id"]),
 }
 

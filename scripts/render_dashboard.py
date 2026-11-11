@@ -2,9 +2,11 @@
 
 Reads the seeded ledger (data/foundry.db, seeding first if missing)
 and writes dashboard/index.html with three tabs: Proofing Table /
-Scorekeeper / Bursar. Feedback (Approve / Tweak / Reject) works
+Scorekeeper / Bursar. Feedback (Tweak / Reject) works
 client-side: Tweak sharpens the hook and shows v2, mirroring the
-Scribe revision rule in foundry/bots.py. This is a demo artifact —
+Scribe revision rule in foundry/bots.py. Approve is disabled — no
+trusted human review channel exists yet (see
+docs/APPROVAL_CHECKPOINT.md). This is a demo artifact —
 the real dashboard extension is foundry/dashboard/ (see ARCHITECTURE.md).
 """
 import html
@@ -56,7 +58,7 @@ def render() -> Path:
         <pre id='draft-text'>{html.escape(p['text'])}</pre>
         <p class='muted'>Evidence: {', '.join(p.get('evidence_ids', []))} · cost so far {_money(p.get('cost_cents', 0))}</p>
         <p><b>Sources</b></p><ul>{sources}</ul>
-        <button onclick="feedback('approve')">Approve</button>
+        <button disabled title="Approval unavailable — trusted human review not wired">Approval unavailable — trusted human review not wired</button>
         <button onclick="feedback('tweak')">Tweak — sharper hook</button>
         <button onclick="feedback('reject')">Reject</button>
         <p id='feedback-msg' class='muted'></p>
@@ -83,7 +85,7 @@ def render() -> Path:
 pre{{white-space:pre-wrap}}.tab{{display:none}}.tab.active{{display:block}}
 .tabbtn{{background:#222;color:#eee;border:1px solid #555}}</style></head><body>
 <h1>Foundry — five bots, one ledger</h1>
-<p class='muted'>Seeded demo data — performance numbers are estimated, not real metrics. Human approval on anything public; nothing auto-posts.</p>
+<p class='muted'>Seeded demo data — performance numbers are estimated, not real metrics. Approval is disabled — no trusted human review channel yet; nothing auto-posts.</p>
 <p><button class='tabbtn' onclick="show('proofing')">Proofing Table</button>
 <button class='tabbtn' onclick="show('score')">Scorekeeper</button>
 <button class='tabbtn' onclick="show('money')">Bursar</button></p>
@@ -95,7 +97,7 @@ pre{{white-space:pre-wrap}}.tab{{display:none}}.tab.active{{display:block}}
 function show(id){{document.querySelectorAll('.tab').forEach(function(t){{t.classList.remove('active')}});document.getElementById(id).classList.add('active');}}
 function feedback(kind){{
   var msg=document.getElementById('feedback-msg'); var el=document.getElementById('draft-text');
-  if(kind==='approve'){{msg.textContent='Approved — Revision Card recorded. Nothing posts until a human approves it (already done here).';}}
+  if(kind==='approve'){{msg.textContent='Approval unavailable — trusted human review not wired. Nothing auto-posts.';}}
   else if(kind==='tweak'){{
     var t=el.textContent; var first=t.split('\\n\\n')[0];
     var sharp=first.replace(/\\.$/,'')+': here is the fix, in one thread.';

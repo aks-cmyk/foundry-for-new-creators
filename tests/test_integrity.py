@@ -72,5 +72,40 @@ class DraftIntegrityTests(unittest.TestCase):
         self.assertEqual(before, ledger.list_cards(self.conn))
 
 
+class SeedFixtureTests(unittest.TestCase):
+    """The seeded demo fixture must never present fake human approval
+    or authorship as real (fixed 2026-11-11: draft-002 was seeded
+    'approved', revision-001 was seeded as human-authored)."""
+
+    def test_seed_contains_no_approved_status(self):
+        seed = json.loads((ROOT / 'foundry/data/seed.json').read_text())
+        self.assertFalse(
+            [c['id'] for c in seed['cards'] if c.get('status') == 'approved'],
+            'seed must not contain an approved status')
+
+    def test_seed_revision_authorship_is_unverified(self):
+        seed = json.loads((ROOT / 'foundry/data/seed.json').read_text())
+        rev = next(c for c in seed['cards'] if c['id'] == 'revision-001')
+        self.assertEqual('unverified', rev['created_by'])
+        self.assertEqual('unverified', rev['payload']['author'])
+
+    def test_static_render_labels_fixture_as_seeded_demo(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            'render_dashboard', ROOT / 'scripts' / 'render_dashboard.py')
+        render_dashboard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(render_dashboard)
+        with tempfile.TemporaryDirectory() as tmp:
+            render_dashboard.DB = Path(tmp) / 'foundry.db'
+            render_dashboard.OUT = Path(tmp) / 'index.html'
+            out = render_dashboard.render()
+            html = out.read_text()
+        self.assertIn('Seeded demo data', html)
+        self.assertIn('Approval unavailable', html)
+        self.assertIn('(in_review)', html)
+        self.assertNotIn('(approved)', html)
+        self.assertNotIn('Approved — Revision Card recorded', html)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

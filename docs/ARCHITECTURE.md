@@ -157,6 +157,10 @@ Read-only, as the guide requires.
 7. Bursar writes Money Card M1 for D2 (costs, revenue, profit).
 8. Next cycle: Lookout reads P1 + M1 before writing E2.
 
+> Note (2026-11-11): step 6 (human approval) is currently **disabled** —
+> the approve routes fail closed until a trusted human review channel
+> exists. See `docs/APPROVAL_CHECKPOINT.md`.
+
 ## What is verified vs unverified
 
 | Piece | Status |
