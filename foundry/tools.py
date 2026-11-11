@@ -101,6 +101,8 @@ def foundry_draft_create(args, **kwargs):
 def foundry_draft_feedback(args, **kwargs):
     draft_id = args["draft_id"]
     ftype = args["feedback_type"]
+    if ftype == "approve":
+        return _err("Approval requires a trusted human review channel; approval is disabled until that channel is verified.")
     note = args.get("note", "")
     if ftype not in ("approve", "tweak", "reject"):
         return _err("feedback_type must be approve, tweak, or reject")
@@ -116,8 +118,8 @@ def foundry_draft_feedback(args, **kwargs):
             version=1, lineage=f"revision-{len(existing) + 1:03d}",
             title=f"Feedback on {draft_id}", status="open",
             payload={"draft_id": draft_id, "feedback_type": ftype,
-                     "note": note, "author": "human", "applied_in": None},
-            created_by="human")
+                     "note": note, "author": "unverified", "applied_in": None},
+            created_by="unverified")
         ledger.add_link(conn, rev["id"], draft_id, "revises")
         if ftype == "tweak":
             new_draft = bots.scribe_revise(
@@ -126,11 +128,6 @@ def foundry_draft_feedback(args, **kwargs):
             ledger.add_event(conn, rev["id"], "applied", {"applied_in": new_draft["id"]})
             return _ok({"revision": ledger.get_card(conn, rev["id"]),
                         "revised_draft": new_draft})
-        if ftype == "approve":
-            conn.execute("UPDATE cards SET status='approved' WHERE id=?", (draft_id,))
-            conn.commit()
-            return _ok({"revision": ledger.get_card(conn, rev["id"]),
-                        "draft": ledger.get_card(conn, draft_id)})
         conn.execute("UPDATE cards SET status='rejected' WHERE id=?", (draft_id,))
         conn.commit()
         return _ok({"revision": ledger.get_card(conn, rev["id"]),
@@ -139,14 +136,8 @@ def foundry_draft_feedback(args, **kwargs):
 
 @_handler
 def foundry_draft_approve(args, **kwargs):
-    with _conn() as conn:
-        draft = ledger.get_card(conn, args["draft_id"])
-        if draft is None:
-            return _err(f"no Draft Card {args['draft_id']}")
-        conn.execute("UPDATE cards SET status='approved' WHERE id=?", (args["draft_id"],))
-        conn.commit()
-        ledger.add_event(conn, args["draft_id"], "approved", {"by": "human"})
-        return _ok({"draft": ledger.get_card(conn, args["draft_id"])})
+    # Neither model arguments nor caller-supplied kwargs establish human origin.
+    return _err("Approval requires a trusted human review channel; approval is disabled until that channel is verified.")
 
 
 @_handler

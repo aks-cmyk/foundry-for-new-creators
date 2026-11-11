@@ -70,11 +70,11 @@ def scribe_draft(conn, *, evidence_id: str, identity_id: str,
     """Create a Draft Card. Refuses if the Evidence Card does not exist
     — Scribe cannot draft without citing evidence."""
     evidence = ledger.get_card(conn, evidence_id)
-    if evidence is None:
-        raise ValueError(f"no Evidence Card {evidence_id}: Scribe cannot draft without evidence")
+    if evidence is None or evidence["kind"] != "evidence":
+        raise ValueError(f"no valid Evidence Card {evidence_id}: Scribe cannot draft without evidence")
     identity = ledger.get_card(conn, identity_id)
-    if identity is None:
-        raise ValueError(f"no Identity Card {identity_id}")
+    if identity is None or identity["kind"] != "identity":
+        raise ValueError(f"no valid Identity Card {identity_id}")
     existing = ledger.list_cards(conn, kind="draft")
     n = len(existing) + 1
     text = "\n\n".join([hook] + body)
