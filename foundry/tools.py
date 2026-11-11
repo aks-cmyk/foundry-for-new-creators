@@ -103,8 +103,14 @@ def foundry_start(args, **kwargs):
                         "identity": bots.latest_identity(conn),
                         "questions": INTERVIEW_QUESTIONS,
                         "instruction": "Ask these questions one at a time, in order. "
-                        "Only who_you_help is required. When the user has answered, "
-                        "call foundry_start again with step 'complete' and the answers."})
+                        "Only who_you_help is required. Complete as soon as "
+                        "who_you_help is answered — do not wait for the rest. "
+                        "Every complete call must include who_you_help plus "
+                        "every answer given so far; each one writes a new "
+                        "Identity version. If the user stops mid-interview, "
+                        "their answers are already saved, and saying "
+                        "'foundry start' again resumes: read the latest "
+                        "Identity Card first and ask only for what is missing."})
         if step == "complete":
             answers = args.get("answers") or {}
             if not isinstance(answers, dict):

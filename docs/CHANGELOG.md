@@ -114,6 +114,25 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Interview timeout fix — 2026-11-11 (live check on Amit's Mac)
+
+Amit ran `foundry_start` on his Mac: the agent asked for every
+answer up front, and the turn ended while he was typing — nothing
+was saved, and the agent (correctly) refused to treat the seeded
+demo Identity Card ("three small tools" story, origin `"seed"`) as
+his voice. Root cause: the skill told the agent to collect all
+answers, then write the card — one long sitting, no partial save.
+Fixed (skill + tool instruction, no logic change):
+- Ask ONE question at a time, in order; never front-load all nine.
+- Complete as soon as `who_you_help` is answered (the only required
+  field) — that writes a real Identity Card immediately. Keep asking
+  the rest one at a time; each complete writes a NEW version and
+  must carry `who_you_help` plus every answer so far.
+- Resume: saying "foundry start" again reads the latest Identity
+  Card first and asks only for what is missing.
+- The skill's Proofing Table step no longer promises an approval
+  step (approval is disabled).
+
 ### Branding — Constellation logo — 2026-11-11 (Amit's pick)
 
 Amit picked Logo D — Constellation (five dots joined by one rising
