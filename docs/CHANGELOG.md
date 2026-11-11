@@ -114,6 +114,22 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Branding — Constellation logo — 2026-11-11 (Amit's pick)
+
+Amit picked Logo D — Constellation (five dots joined by one rising
+line: the shared memory connecting five bots) over the earlier
+anvil/bars rounds, which he called too basic and uninteresting.
+Assets in `foundry/assets/`: `logo-constellation-dark.png` /
+`-light.png` (transparent-background marks, cut from the chosen
+sheet — no regeneration) and
+`logo-constellation-wordmark-dark.png` / `-light.png` (mark +
+letterspaced FOUNDRY lockups, for the README and the video title
+card). `foundry/README.md` added (closes the catalog pre-PR flag)
+with the rule-13 disclosures. Catalog entry `image` now points at
+the light mark via raw.githubusercontent.com (owner + SHA filled at
+PR time). The dashboard header was deliberately NOT changed — the
+verified `dist/index.js` stays untouched on deadline day.
+
 ### Onboarding — foundry_start + Brand tab — 2026-11-11 (Amit's call)
 
 Amit's user-flow notes: a first run should offer "foundry start",
