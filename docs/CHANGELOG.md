@@ -114,6 +114,55 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Adopted 2026-11-11 — Mac Studio integrity + scoped-memory work (candidate bde3c03)
+
+Adopted as `d257c2b`; fixture fixes as `4948d7f`. The Mac Studio
+Hermes found real flaws (review verdict: ADOPT WITH FIXES —
+`hidden_files/mac-studio-return-2026-11-10/REVIEW_VERDICT.md`); the
+Mac git history was NOT adopted (different lineage + a local author
+identity that must never go public).
+
+#### Added
+- `foundry/memory.py`: role-bound SQLite memory-candidate store
+  (tested module; **NOT integrated** — nothing imports it,
+  `retrieve()` returns `[]` by design; do not present as a feature).
+- `tests/test_integrity.py` (4 methods), `tests/test_memory.py`
+  (5 methods); `docs/APPROVAL_CHECKPOINT.md`,
+  `docs/SCOPED_MEMORY_CHECKPOINT.md`.
+
+#### Fixed
+- **Wrong-kind draft inputs rejected.** `scribe_draft` now checks
+  the evidence/identity cards are of the right kind before any write.
+- **Spoofable approval closed.** All three approve routes
+  (`foundry_draft_approve`, `foundry_draft_feedback` with
+  `feedback_type="approve"`, dashboard `POST /feedback`) fail closed
+  with no writes; feedback authorship is `unverified`, never `human`.
+- **Seed fixture honesty.** `draft-002` status `approved` →
+  `in_review`; `revision-001` author/created_by `human` →
+  `unverified`. Regression tests added (seed has no `approved`
+  status; render labels the fixture as seeded demo-only).
+- **Approve buttons disabled** with an honest label ("Approval
+  unavailable — trusted human review not wired") on the web
+  dashboard, Desktop app, and static render.
+- **`plugin.yaml` description + tool schemas stop claiming human
+  approval.** Approval is disabled, not implemented — no trusted
+  human review channel exists yet.
+
+#### Verified (VM, Hermes v0.23.0, Python 3.12.3, 2026-11-11)
+- `tests/test_memory.py` 5/5; `tests/test_integrity.py` 7/7 (4
+  adopted + 3 new fixture tests); smoke test 34/34.
+- `hermes plugins validate` (run on a copy — the capability probe
+  can write a demo DB into the plugin tree): PASS, 16/16, 0 warnings.
+- `hermes plugins doctor`: PASS, 7 tools, 0 hooks.
+- Full logs: `hidden_files/adoption-2026-11-10/`.
+
+#### Known gaps (not yet done)
+- **LICENSE / copyright holder: OPEN, needs Amit's decision.**
+  `plugin.yaml` claims `license: MIT` but there is no LICENSE file
+  and no copyright holder anywhere in the tree. Do not invent one.
+- Live Scribe via `ctx.llm`, live web dashboard load, live Desktop
+  load: still unverified (Mac Studio live check never completed).
+- Trusted human approval: explicitly not provided (see above).
 - Lookout live search (needs a `ctx` surface or MCP route — none
   verified); Scorekeeper/Bursar live analytics + money imports;
   catalog PR (needs catalog entry format read + a real repo URL for

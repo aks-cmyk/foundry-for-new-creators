@@ -180,3 +180,59 @@ Full log: `hidden_files/validation-2026-11-06b.log`.
   workspace. Both need Amit's Mac Studio.
 - Live `ctx.llm` completion against a real model (wired, fake-LLM
   tested only).
+
+## Third round — Mac Studio adoption + fixture fixes (2026-11-11)
+
+Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
+`4948d7f`. Full logs: `hidden_files/adoption-2026-11-10/`.
+
+### What changed
+- Adopted 7 files from the Mac Studio return: `foundry/bots.py`
+  (kind checks in `scribe_draft`), `foundry/tools.py` (approve
+  fail-closed, authorship `human` → `unverified`),
+  `foundry/memory.py` (new — role-bound SQLite memory-candidate
+  store, unintegrated), `tests/test_integrity.py` (4 methods),
+  `tests/test_memory.py` (5 methods),
+  `docs/APPROVAL_CHECKPOINT.md`, `docs/SCOPED_MEMORY_CHECKPOINT.md`.
+- Must-fix items (same work, commit `4948d7f`): seed `draft-002`
+  `approved` → `in_review`, `revision-001` authorship → `unverified`;
+  Approve buttons disabled with an honest label on web, Desktop, and
+  static render; `plugin.yaml` description + tool schemas stop
+  claiming human approval; docs/render wording corrected; 3 new
+  fixture regression tests.
+
+### Re-verification on the fixed tree
+- `python3 -I tests/test_memory.py`: **5/5 OK**
+- `python3 -I tests/test_integrity.py`: **7/7 OK** (4 adopted +
+  3 new fixture tests)
+- `python3 -I tests/test_smoke.py`: **34/34 PASS**
+- `hermes plugins validate <copy>/foundry --json`: **PASS, 16/16,
+  0 warnings** — run on a copy of the plugin tree under
+  `hidden_files/adoption-2026-11-10/validate-copy/` (copy deleted
+  after; logs kept). Lesson from the review: the capability probe can
+  write a demo DB into the probed tree — always validate a copy and
+  clean the tree after. No probe DB appeared in the copy this run.
+- `hermes plugins doctor <copy>/foundry --ci`: **PASS, 7 tools,
+  0 hooks**
+- Environment: system Python 3.12.3; Hermes v0.23.0; isolated
+  `HERMES_HOME` (`hidden_files/hermes-home`); real `~/.hermes`
+  untouched (`plugin-data` still empty, mtime Nov 6).
+- Also verified: `make demo` re-renders from the fixed seed —
+  `dashboard/index.html` shows `v2 (in_review)` and the disabled
+  Approve label, with no `approved` wording.
+
+### Still NOT covered after adoption
+- Live Scribe via `ctx.llm`, live web dashboard load, live Desktop
+  load — wired and statically verified only; the Mac Studio live
+  check never completed.
+- **Trusted human approval — explicitly NOT provided.** Approval is
+  disabled, not implemented. See `docs/APPROVAL_CHECKPOINT.md`.
+- **Scoped memory as a product capability** — module only; nothing
+  imports it, `retrieve()` returns `[]` by design, no promotion, no
+  host integration. Do not present it as a shipped feature.
+- **Licensing/provenance** — MIT claimed in one metadata field
+  (`plugin.yaml`); no LICENSE file, no copyright holder. Amit's
+  decision, still open.
+- Typeform fields — still unverified (JS-rendered form).
+- `requires_hermes >=0.21.5` — docs' example floor, not a bisected
+  minimum.
