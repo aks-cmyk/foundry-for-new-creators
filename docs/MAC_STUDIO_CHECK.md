@@ -5,8 +5,9 @@ a real `ctx.llm` Scribe revision, and a live dashboard load — on Amit's
 Mac Studio, where his real Hermes lives. Both are now done: live Scribe
 verified Nov 10, 2026 (draft-003, `generation: "llm"`); live dashboard
 load verified Nov 10, 11:15 PM (tabs render). Remaining unverified:
-the Brand-tab live re-test, the Desktop load, and the draft-003
+the Desktop load and the draft-003
 correction (Amit has not yet picked an option — option 1 advised).
+The Brand tab renders live — Amit confirmed all four tabs Nov 11.
 
 Status before this check (VM, 2026-11-06):
 - Hermes v0.23.0 installed in the VM; `hermes plugins validate` PASS

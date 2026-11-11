@@ -222,7 +222,7 @@ Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
   Approve label, with no `approved` wording.
 
 ### Still NOT covered after adoption
-- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test done Nov 10, 11:15 PM — tabs render (three tabs at the time; the redesign + Brand tab live re-test is still pending). Live Desktop load — wired and statically verified only.
+- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test done Nov 10, 11:15 PM — tabs render (three tabs at the time). Redesign + Brand tab confirmed live Nov 11 — Amit: all four tabs render. Live Desktop load — wired and statically verified only.
 - **Trusted human approval — explicitly NOT provided.** Approval is
   disabled, not implemented. See `docs/APPROVAL_CHECKPOINT.md`.
 - **Scoped memory as a product capability** — module only; nothing
@@ -272,7 +272,7 @@ Verification (VM, Hermes v0.23.0, 2026-11-11):
   serves HTTP 200. Side finding: a not-enabled plugin is absent from
   the manifest list entirely (the isolated home had Foundry "not
   enabled" until this round).
-- Live re-test on Amit's Mac Studio: done Nov 10, 11:15 PM — tabs render (three tabs at the time; the redesign + Brand tab live re-test is still pending).
+- Live re-test on Amit's Mac Studio: done Nov 10, 11:15 PM — tabs render (three tabs at the time). Redesign + Brand tab confirmed live Nov 11 — Amit: all four tabs render.
 
 ### Fifth round — onboarding (foundry_start + Brand tab)
 

@@ -4,7 +4,7 @@
  * children(active, setActive); elements-as-children threw on first
  * render and unmounted the app. Fixed 2026-11-10 (render-prop form
  * below); live re-test Nov 10, 11:15 PM: renders (three tabs then;
- * the board now has four — Brand tab live re-test pending).
+ * the board now has four — confirmed live Nov 11, all four tabs render).
  * Redesign 2026-11-11 (Amit's call): Proofing Table lists ALL drafts
  * as a vertical card stack, newest first — a phone-like feed in a
  * narrow centered column; each card has its own laid-out buttons.
