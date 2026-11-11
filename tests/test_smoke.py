@@ -170,8 +170,8 @@ def main():
             self.skills[name] = path
     ctx = FakeCtx()
     foundry_plugin.register(ctx)
-    check("register() registers 7 tools (dashboard_render dropped 2026-11-06)",
-          len(ctx.tools) == 7)
+    check("register() registers 8 tools (foundry_start added 2026-11-11)",
+          len(ctx.tools) == 8)
     check("register() passes toolset='foundry' for all tools",
           set(ctx.toolsets.values()) == {"foundry"})
     check("register() registers foundry-creator skill", "foundry-creator" in ctx.skills)

@@ -99,7 +99,57 @@ def feedback(body: dict):
     return _feedback(draft_id, feedback_type, note)
 
 
+BRAND_FIELDS = ("who_you_help", "audience", "story", "pillars", "beliefs",
+                "against", "voice_examples", "voice_donts", "mission")
+BRAND_LIST_FIELDS = ("pillars", "beliefs", "voice_examples", "voice_donts")
+
+
+def brand(body: dict):
+    """Save the brand from the Brand tab (web or Desktop).
+    Body: {"identity_id": ..., "payload": {...}} — identity_id is
+    optional and defaults to the latest Identity Card. Merges the
+    given fields over the current brand and writes a NEW Identity
+    version (cards are never mutated); the old version is untouched.
+    Lists may be arrays or comma-separated strings. Created by
+    'dashboard' with origin 'dashboard-edit' — the dashboard has no
+    auth channel, so the edit is recorded as a dashboard edit, never
+    as human authorship. Returns {"ok": true, "identity": ...}."""
+    from foundry import bots, ledger
+    payload = (body or {}).get("payload") or {}
+    if not isinstance(payload, dict):
+        return {"ok": False, "error": "brand needs a payload object"}
+    unknown = sorted(set(payload) - set(BRAND_FIELDS))
+    if unknown:
+        return {"ok": False, "error": "unknown brand fields: " + ", ".join(unknown)}
+    conn = _conn()
+    try:
+        identity_id = (body or {}).get("identity_id")
+        if identity_id:
+            current = ledger.get_card(conn, identity_id)
+            if current is None or current["kind"] != "identity":
+                return {"ok": False, "error": f"no Identity Card {identity_id}"}
+        else:
+            current = bots.latest_identity(conn)
+            if current is None:
+                return {"ok": False, "error": "no Identity Card yet — run foundry_start first"}
+        answers = dict(current["payload"])
+        for key, value in payload.items():
+            if key in BRAND_LIST_FIELDS and isinstance(value, str):
+                value = [s.strip() for s in value.replace("\n", ",").split(",") if s.strip()]
+            answers[key] = value
+        answers.pop("origin", None)
+        if not (answers.get("who_you_help") or "").strip():
+            return {"ok": False, "error": "who_you_help is required"}
+        card = bots.cartographer_interview(conn, answers,
+                                           origin="dashboard-edit",
+                                           created_by="dashboard")
+        return {"ok": True, "identity": card}
+    finally:
+        conn.close()
+
+
 if router is not None:
     router.get("/cards")(list_cards)
     router.get("/summary")(summary)
     router.post("/feedback")(feedback)
+    router.post("/brand")(brand)

@@ -40,7 +40,7 @@
 ## Components
 
 ### Plugin entry (`foundry/__init__.py`)
-`register(ctx)` only. It registers the 7 tools (schema + handler)
+`register(ctx)` only. It registers the 8 tools (schema + handler)
 and the bundled skill. It does no work at import time, opens no
 network connections, and never raises on registration failure —
 a failed registration is logged and the plugin loads degraded.

@@ -72,6 +72,54 @@ def _handler(fn):
     return wrapper
 
 
+# Cartographer interview — the questions foundry_start asks, in order.
+# Keys match cartographer_interview's answers dict; only who_you_help
+# is required. Lists arrive as arrays or comma-separated strings.
+INTERVIEW_QUESTIONS = [
+    {"key": "who_you_help", "question": "Who do you help, and with what?", "required": True},
+    {"key": "audience", "question": "Who exactly is your audience — describe them in a sentence.", "required": False},
+    {"key": "story", "question": "Your story in a sentence or two: what did you build, and what did you learn?", "required": False},
+    {"key": "pillars", "question": "Three topics you will write about most (your pillars)?", "required": False},
+    {"key": "beliefs", "question": "What do you believe that most people in your niche get wrong?", "required": False},
+    {"key": "against", "question": "What kind of advice will you never give?", "required": False},
+    {"key": "voice_examples", "question": "Paste 2–3 lines you have written that sound like you.", "required": False},
+    {"key": "voice_donts", "question": "Words or phrases you never want to see in your posts?", "required": False},
+    {"key": "mission", "question": "Your mission in one line?", "required": False},
+]
+
+
+@_handler
+def foundry_start(args, **kwargs):
+    """Cartographer onboarding — the front door. Two steps, one tool:
+    step 'begin' returns the interview questions (the agent asks them
+    one at a time, in order); step 'complete' with answers writes the
+    Identity Card. Only who_you_help is required. A bare call (no step)
+    is 'begin'. Re-running after onboarding creates a new Identity
+    version — the old one is never mutated."""
+    step = args.get("step", "begin") or "begin"
+    with _conn() as conn:
+        if step == "begin":
+            return _ok({"onboarded": bots.is_onboarded(conn),
+                        "identity": bots.latest_identity(conn),
+                        "questions": INTERVIEW_QUESTIONS,
+                        "instruction": "Ask these questions one at a time, in order. "
+                        "Only who_you_help is required. When the user has answered, "
+                        "call foundry_start again with step 'complete' and the answers."})
+        if step == "complete":
+            answers = args.get("answers") or {}
+            if not isinstance(answers, dict):
+                return _err("answers must be an object keyed by interview question")
+            for key in ("pillars", "beliefs", "voice_examples", "voice_donts"):
+                v = answers.get(key)
+                if isinstance(v, str):
+                    answers[key] = [s.strip() for s in v.replace("\n", ",").split(",") if s.strip()]
+            card = bots.cartographer_interview(conn, answers)
+            return _ok({"identity": card, "onboarded": True,
+                        "note": "Brand set. Scribe now drafts in this brand's voice; "
+                        "see it on the Brand tab."})
+        return _err("step must be 'begin' or 'complete'")
+
+
 @_handler
 def foundry_ledger_list(args, **kwargs):
     with _conn() as conn:
@@ -91,6 +139,12 @@ def foundry_ledger_get(args, **kwargs):
 @_handler
 def foundry_draft_create(args, **kwargs):
     with _conn() as conn:
+        identity = ledger.get_card(conn, args["identity_id"])
+        if (identity is not None and identity["kind"] == "identity"
+                and identity["payload"].get("origin") == "seed"):
+            return _err("identity-001 is Foundry's demo brand, not yours. "
+                        "Run foundry_start first — a short interview sets up "
+                        "your own brand — then draft with the new Identity Card.")
         card = bots.scribe_draft(conn, evidence_id=args["evidence_id"],
                                  identity_id=args["identity_id"],
                                  hook=args["hook"], body=args["body"])
@@ -173,6 +227,7 @@ def foundry_money_summary(args, **kwargs):
 # dashboard surface is foundry/dashboard/ (web) and foundry/desktop/
 # (Desktop GUI), served by plugin_api.py.
 HANDLERS = {
+    "foundry_start": foundry_start,
     "foundry_ledger_list": foundry_ledger_list,
     "foundry_ledger_get": foundry_ledger_get,
     "foundry_draft_create": foundry_draft_create,

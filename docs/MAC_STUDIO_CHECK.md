@@ -46,7 +46,7 @@ hermes plugins doctor foundry --ci
 hermes plugins enable foundry
 ```
 
-Expected: validate PASS, doctor PASS with **7 tools registered**.
+Expected: validate PASS, doctor PASS with **8 tools registered**.
 (The count was 8 before the 2026-11-06 fix round dropped the
 `foundry_dashboard_render` tool, which failed in a live install.)
 If doctor shows 0 tools, or validate fails, stop and send Zuzu the
@@ -83,7 +83,7 @@ In the Hermes Desktop app:
 1. Open **Capabilities → Plugins**, find **Foundry**, flip it on.
    (It ships opt-in, so it will be listed but off until you enable it.)
 2. Open the **Foundry** page from the sidebar. Expected: the same
-   three tabs — Proofing Table, Scorekeeper, Bursar — over the 9
+   four tabs — Proofing Table, Brand, Scorekeeper, Bursar — over the 9
    seeded cards.
 3. On the Proofing Table, try **Tweak** with the note "sharper hook".
    Expected: a v3 draft comes back on the board (no pop-up alert —
@@ -92,15 +92,45 @@ In the Hermes Desktop app:
 Report back: did the Foundry page appear, which tabs rendered, and
 did Tweak return v3?
 
-## 6. What to send Zuzu
+## 6. Onboarding live check (foundry start + Brand tab)
+
+This is the one part the VM cannot test — the interview needs a live
+model, and yours has one. In a fresh Hermes session, just say:
+
+foundry start
+
+Expected: Hermes asks the interview questions one at a time (who you
+help, audience, story, pillars, beliefs, what you will never say,
+voice examples, words you never use, mission). Answer in your own
+words — only the first one is required. When you are done, Hermes
+writes your Identity Card (v2 — the seeded demo brand is v1).
+
+Then check two things:
+1. In chat, ask: *show me my brand* (or list the identity cards).
+   Expected: your answers, as Identity Card v2.
+2. In the dashboard, open the **Brand** tab. Expected: your brand
+   shown (v2, "interview"), with an **Edit brand** button. Try
+   changing one field (e.g. Mission) and saving — it should come
+   back as v3, and v2 should still be in the ledger underneath.
+
+Also try, once: ask Hermes to draft something *before* the interview
+is done (or with the demo brand). Expected: it refuses and points
+you at `foundry start` — it should never draft in the demo brand's
+voice.
+
+Report back: did the interview run, what did the Brand tab show,
+and did the edit save as v3?
+
+## 7. What to send Zuzu
 
 - `hermes --version` output
 - validate + doctor output (pass/fail, tool count)
 - Scribe v3 result: `llm` or `rule-based`?
 - Web dashboard: which tabs rendered?
 - Desktop: did the Foundry page appear, and did Tweak return v3?
+- Onboarding: did the interview run, what did the Brand tab show, and did the edit save as v3?
 
-With those five answers, the last UNVERIFIED items close, and the
+With those six answers, the last UNVERIFIED items close, and the
 next step — GitHub repo + catalog PR + demo video + Typeform, only
 with Amit's go-ahead — can start. Deadline: Wed Nov 11, 2026,
 5 PM EST / 2 PM PST.

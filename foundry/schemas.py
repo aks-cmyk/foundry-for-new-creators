@@ -8,6 +8,15 @@ def _str(desc):
     return {"type": "string", "description": desc}
 
 
+FOUNDRY_START = {
+    "name": "foundry_start",
+    "description": "Cartographer: start Foundry — the onboarding interview that sets up the creator's brand. Say 'foundry start' to run this. Call with step 'begin' (or no arguments) to get the interview questions; ask them one at a time, in order. Then call again with step 'complete' and the answers to write the Identity Card. Only who_you_help is required. Until a brand exists, Scribe cannot draft in the user's voice — drafting with the demo brand is refused.",
+    "parameters": _obj({"step": _str("begin: get the interview questions. complete: write the Identity Card from answers."),
+                        "answers": {"type": "object",
+                                    "description": "Interview answers keyed by question: who_you_help (required), audience, story, pillars (up to 3), beliefs, against, voice_examples (up to 5), voice_donts, mission. Lists may be given as arrays or comma-separated strings."}},
+                       []),
+}
+
 FOUNDRY_LEDGER_LIST = {
     "name": "foundry_ledger_list",
     "description": "List Foundry ledger cards, optionally filtered by kind (identity, evidence, draft, revision, performance, money) or status.",
@@ -65,6 +74,6 @@ FOUNDRY_MONEY_SUMMARY = {
 # so the tool failed in a live install. Static rendering for demos lives in
 # scripts/render_dashboard.py (make demo); the live dashboards are served
 # by foundry/dashboard/plugin_api.py.
-ALL_SCHEMAS = [FOUNDRY_LEDGER_LIST, FOUNDRY_LEDGER_GET, FOUNDRY_DRAFT_CREATE,
+ALL_SCHEMAS = [FOUNDRY_START, FOUNDRY_LEDGER_LIST, FOUNDRY_LEDGER_GET, FOUNDRY_DRAFT_CREATE,
                FOUNDRY_DRAFT_FEEDBACK, FOUNDRY_DRAFT_APPROVE, FOUNDRY_SCORECARD,
                FOUNDRY_MONEY_SUMMARY]

@@ -74,6 +74,15 @@ Rules that make the crew a system, not a list:
    disabled — 2026-11-11: the approve routes fail closed until a
    trusted human review channel exists; see
    `docs/APPROVAL_CHECKPOINT.md`.)
+5. **Onboarding is the front door, not a doc.** A new user says
+   "foundry start": Cartographer asks nine questions (who you help,
+   audience, story, pillars, beliefs, what you will never say, voice
+   examples, words you never use, mission — only the first is
+   required) and writes the Identity Card. Until a real brand exists,
+   Scribe refuses to draft in the seeded demo brand's voice. The
+   brand is visible and editable on the Brand tab. Without this the
+   plugin is a skill with a dashboard — the interview is what makes
+   it a product.
 
 ## 4. Shared ledger — summary
 
@@ -100,11 +109,11 @@ Storage: in Hermes, `plugin_db("foundry")` (SQLite, WAL) via
 scaffold, a local SQLite file (`data/foundry.db`, regenerated from
 `foundry/data/seed.json`). Never store state in the plugin directory.
 
-## 5. Surfaces — one dashboard shell, three tabs
+## 5. Surfaces — one dashboard shell, four tabs
 
 One web-dashboard extension (`foundry/dashboard/`, manifest +
 IIFE bundle + FastAPI backend at `/api/plugins/foundry/`).
-One shell, three tabs, all reading the same ledger:
+One shell, four tabs, all reading the same ledger:
 
 ### 5.1 Proofing Table (primary surface)
 
@@ -116,13 +125,25 @@ One shell, three tabs, all reading the same ledger:
 - On Tweak/Reject: Scribe returns a revised draft; the Revision Card
   is stored; the board updates. No full WYSIWYG editor in the MVP.
 
-### 5.2 Scorekeeper dashboard
+### 5.2 Brand tab
+
+- The current Identity Card: who you help, audience, mission,
+  story, pillars, beliefs, what you will never say, voice examples,
+  words you never use — viewable, and editable in place.
+- Editing writes a NEW Identity version (cards are never mutated);
+  the old version stays in the ledger. A save from the dashboard is
+  recorded as `created_by: "dashboard"`, origin `"dashboard-edit"` —
+  the dashboard has no auth channel, so it is never "human" authorship.
+- If the current brand is still the seeded demo (`origin: "seed"`),
+  the tab says so and points at `foundry start`.
+
+### 5.3 Scorekeeper dashboard
 
 - What worked, by pillar / format / hook. Top posts, underperformers.
 - One recommendation per cycle: repeat this, drop that.
 - Click a post → its draft, evidence, performance and money in one view.
 
-### 5.3 Bursar dashboard
+### 5.4 Bursar dashboard
 
 - P&L per post, per client, per month. Cost breakdown (model, tools, time).
 - Brand-partnership pipeline: pitched → terms → delivered → paid,
@@ -162,9 +183,10 @@ no content-only tool can surface.
 
 | Tool | What it does |
 |---|---|
+| `foundry_start` | **Onboarding (front door).** Cartographer interview: step `begin` returns the 9 questions (ask one at a time); step `complete` with answers writes the Identity Card. Only `who_you_help` is required. Say "foundry start" to run it. |
 | `foundry_ledger_list` | List ledger cards, filtered by kind / status |
 | `foundry_ledger_get` | Get one card (with its links) by id |
-| `foundry_draft_create` | Scribe: create a Draft Card from an Evidence Card + Identity Card |
+| `foundry_draft_create` | Scribe: create a Draft Card from an Evidence Card + Identity Card. Refuses the seeded demo brand — run `foundry_start` first. |
 | `foundry_draft_feedback` | Record a Revision Card (tweak / reject) and, on tweak, return a revised draft; approve is disabled (no trusted human review channel yet) |
 | `foundry_draft_approve` | Approval is disabled — always errors until a trusted human review channel exists |
 | `foundry_scorecard` | Scorekeeper summary for a draft / period |

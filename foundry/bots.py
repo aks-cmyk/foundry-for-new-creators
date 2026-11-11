@@ -23,13 +23,24 @@ import json
 from . import ledger
 
 
-def cartographer_interview(conn, answers: dict) -> dict:
+def cartographer_interview(conn, answers: dict, *,
+                         origin: str = "interview",
+                         created_by: str = "cartographer") -> dict:
     """Build an Identity Card from interview answers. Version 1 unless
-    a previous Identity Card exists, in which case version + 1."""
+    a previous Identity Card exists, in which case version + 1.
+    origin records how the card was made: "interview" (foundry_start),
+    "dashboard-edit" (Brand tab save), "seed" (demo data only).
+    created_by records who made it: "cartographer" for the interview,
+    "dashboard" for a Brand-tab save. Neither is ever "human" — the
+    dashboard has no auth channel, so a dashboard edit is recorded as
+    a dashboard edit, not as human authorship."""
+    if not (answers.get("who_you_help") or "").strip():
+        raise ValueError("cartographer_interview needs who_you_help")
     existing = ledger.list_cards(conn, kind="identity")
     version = (max(c["version"] for c in existing) + 1) if existing else 1
     card_id = f"identity-{version:03d}"
     payload = {
+        "origin": origin,
         "who_you_help": answers["who_you_help"],
         "audience": answers.get("audience", ""),
         "story": answers.get("story", ""),
@@ -44,8 +55,22 @@ def cartographer_interview(conn, answers: dict) -> dict:
     return ledger.create_card(
         conn, id=card_id, kind="identity", version=version,
         lineage="identity-001", title="Identity Card",
-        status="active", payload=payload, created_by="cartographer",
+        status="active", payload=payload, created_by=created_by,
         supersedes_id=supersedes)
+
+
+def latest_identity(conn) -> dict | None:
+    """The current brand: the latest Identity Card, or None."""
+    existing = ledger.list_cards(conn, kind="identity")
+    return existing[-1] if existing else None
+
+
+def is_onboarded(conn) -> bool:
+    """True once a real brand exists — an Identity Card whose origin
+    is not the demo seed. The seeded identity-001 is demo data, not
+    the user's brand."""
+    ident = latest_identity(conn)
+    return ident is not None and ident["payload"].get("origin") != "seed"
 
 
 def lookout_evidence(conn, *, topic: str, sources: list[dict],

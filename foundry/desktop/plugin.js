@@ -44,8 +44,10 @@ function FoundryPage({ rest }) {
   const [tab, setTab] = useState('proofing')
   const [cards, setCards] = useState([])
   const [error, setError] = useState(null)
-  const [note, setNote] = useState('sharper hook')
+  const [notes, setNotes] = useState({}) // per-draft one-line note
   const [busy, setBusy] = useState(false)
+  const [brandForm, setBrandForm] = useState(null) // null = viewing, values = editing
+  const [brandBusy, setBrandBusy] = useState(false)
 
   function load() {
     return rest('/cards').then(function (d) {
@@ -57,9 +59,14 @@ function FoundryPage({ rest }) {
   }
   useEffect(function () { load() }, [])
 
-  function sendFeedback(type) {
-    var latest = cards.filter(function (c) { return c.kind === 'draft' }).slice(-1)[0]
-    if (!latest || busy) { return }
+  function draftNote(draftId) { return notes[draftId] === undefined ? 'sharper hook' : notes[draftId] }
+  function setDraftNote(draftId, value) {
+    var next = {}; next[draftId] = value
+    setNotes(Object.assign({}, notes, next))
+  }
+  function sendFeedback(draftId, type) {
+    if (!draftId || busy) { return }
+    var note = draftNote(draftId)
     if (type === 'reject' && !note.trim()) {
       setError('Reject needs a reason — type one in the note box first.')
       return
@@ -68,7 +75,7 @@ function FoundryPage({ rest }) {
     setError(null)
     rest('/feedback', {
       method: 'POST',
-      body: { draft_id: latest.id, feedback_type: type, note: type === 'approve' ? '' : note }
+      body: { draft_id: draftId, feedback_type: type, note: type === 'approve' ? '' : note }
     }).then(function (d) {
       if (!d || d.ok === false) { throw new Error((d && d.error) || 'feedback failed') }
       return load()
@@ -80,29 +87,125 @@ function FoundryPage({ rest }) {
   var drafts = cards.filter(function (c) { return c.kind === 'draft' })
   var perf = cards.filter(function (c) { return c.kind === 'performance' })
   var moneyCards = cards.filter(function (c) { return c.kind === 'money' })
-  var latest = drafts[drafts.length - 1]
+  var identities = cards.filter(function (c) { return c.kind === 'identity' })
+  var identity = identities[identities.length - 1]
+
+  // Brand tab — view + edit. Lists are comma-separated in the form.
+  var BRAND_FIELDS = [
+    ['who_you_help', 'Who you help', 'input'],
+    ['audience', 'Audience', 'input'],
+    ['mission', 'Mission', 'input'],
+    ['story', 'Story', 'textarea'],
+    ['pillars', 'Pillars (comma-separated)', 'input'],
+    ['beliefs', 'Beliefs (comma-separated)', 'input'],
+    ['against', 'Never say', 'input'],
+    ['voice_examples', 'Voice examples (one per line)', 'textarea'],
+    ['voice_donts', 'Never use (comma-separated)', 'input']
+  ]
+  var BRAND_LIST_KEYS = ['pillars', 'beliefs', 'voice_examples', 'voice_donts']
+  function splitList(s) { return (s || '').split(/[\n,]+/).map(function (x) { return x.trim() }).filter(Boolean) }
+  function joinList(v) { return (v || []).join(', ') }
+  function startBrandEdit() {
+    if (!identity) { return }
+    var p = identity.payload, values = {}
+    BRAND_FIELDS.forEach(function (f) {
+      values[f[0]] = Array.isArray(p[f[0]]) ? p[f[0]].join('\n') : (p[f[0]] || '')
+    })
+    setBrandForm(values)
+  }
+  function saveBrand() {
+    if (!brandForm || brandBusy || !identity) { return }
+    var payload = {}
+    BRAND_FIELDS.forEach(function (f) {
+      var key = f[0]
+      payload[key] = BRAND_LIST_KEYS.indexOf(key) !== -1 ? splitList(brandForm[key]) : brandForm[key]
+    })
+    setBrandBusy(true)
+    setError(null)
+    rest('/brand', {
+      method: 'POST',
+      body: { identity_id: identity.id, payload: payload }
+    }).then(function (d) {
+      if (!d || d.ok === false) { throw new Error((d && d.error) || 'brand save failed') }
+      setBrandForm(null)
+      return load()
+    }).catch(function (e) {
+      setError('Brand save failed: ' + (e && e.message ? e.message : e))
+    }).then(function () { setBrandBusy(false) })
+  }
+  function setBrandField(key, value) {
+    var next = {}; next[key] = value
+    setBrandForm(Object.assign({}, brandForm, next))
+  }
 
   var body
   if (tab === 'proofing') {
-    body = latest ? jsxs('div', { style: cardStyle, children: [
-      jsx('h3', { children: latest.title + ' — v' + latest.version + ' (' + latest.status + ')' }),
-      jsx('pre', { style: { whiteSpace: 'pre-wrap' }, children: latest.payload.text }),
-      jsx('p', { style: mutedStyle, children: 'Evidence: ' + (latest.payload.evidence_ids || []).join(', ') }),
-      jsx('input', {
-        type: 'text', value: note, 'aria-label': 'One-line note for Scribe',
-        placeholder: 'One-line note, e.g. sharper hook',
-        style: { width: '100%', padding: '6px', marginBottom: '8px' },
-        onChange: function (e) { setNote(e.target.value) }
-      }),
-      jsxs('div', { children: [
-        // Approval is disabled (2026-11-11): no trusted human review
-        // channel exists yet — the button stays inert, not an error.
-        jsx('button', { style: btnStyle, disabled: true, title: 'Approval unavailable — trusted human review not wired', children: 'Approval unavailable — trusted human review not wired' }),
-        jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback('tweak') }, children: 'Tweak' }),
-        jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback('reject') }, children: 'Reject' })
-      ] }),
-      jsx('p', { style: mutedStyle, children: 'Approval is disabled — no trusted human review channel yet. Nothing auto-posts. Tweak sends the note to Scribe and returns a new draft version — the original is never changed; feedback is recorded as unverified.' })
-    ] }) : jsx('p', { children: 'No drafts yet.' })
+    // All drafts, newest first — a vertical card stack; each card has
+    // its own note box and buttons.
+    var ordered = drafts.slice().reverse()
+    body = ordered.length ? jsxs('div', { children: ordered.map(function (d) {
+      return jsxs('div', { key: d.id, style: cardStyle, children: [
+        jsx('h3', { children: d.title + ' — v' + d.version + ' (' + d.status + ')' }),
+        jsx('pre', { style: { whiteSpace: 'pre-wrap' }, children: d.payload.text }),
+        jsx('p', { style: mutedStyle, children: 'Evidence: ' + (d.payload.evidence_ids || []).join(', ') }),
+        jsx('input', {
+          type: 'text', value: draftNote(d.id), 'aria-label': 'One-line note for Scribe',
+          placeholder: 'One-line note, e.g. sharper hook',
+          style: { width: '100%', padding: '6px', marginBottom: '8px' },
+          onChange: function (e) { setDraftNote(d.id, e.target.value) }
+        }),
+        jsxs('div', { children: [
+          // Approval is disabled (2026-11-11): no trusted human review
+          // channel exists yet — the button stays inert, not an error.
+          jsx('button', { style: btnStyle, disabled: true, title: 'Approval unavailable — trusted human review not wired', children: 'Approval unavailable' }),
+          jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback(d.id, 'tweak') }, children: 'Tweak' }),
+          jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback(d.id, 'reject') }, children: 'Reject' })
+        ] }),
+        jsx('p', { style: mutedStyle, children: 'Approval is disabled — no trusted human review channel yet. Nothing auto-posts. Tweak sends the note to Scribe and returns a new draft version — the original is never changed; feedback is recorded as unverified.' })
+      ] })
+    }) }) : jsx('p', { children: 'No drafts yet.' })
+  } else if (tab === 'brand') {
+    if (!identity) {
+      body = jsx('p', { children: "No brand yet. Say 'foundry start' in chat — a short interview sets up your brand." })
+    } else if (brandForm) {
+      body = jsxs('div', { style: cardStyle, children: [
+        jsx('h3', { children: 'Edit brand' }),
+        jsxs('div', { children: BRAND_FIELDS.map(function (f) {
+          var key = f[0], label = f[1], kind = f[2]
+          return jsxs('div', { key: key, style: { marginBottom: '10px' }, children: [
+            jsx('label', { style: { display: 'block', fontSize: '0.85em', marginBottom: '4px' }, children: label }),
+            kind === 'textarea'
+              ? jsx('textarea', { value: brandForm[key], rows: 3, style: { width: '100%', padding: '6px' }, onChange: function (e) { setBrandField(key, e.target.value) } })
+              : jsx('input', { type: 'text', value: brandForm[key], style: { width: '100%', padding: '6px' }, onChange: function (e) { setBrandField(key, e.target.value) } })
+          ] })
+        }) }),
+        jsxs('div', { children: [
+          jsx('button', { style: btnStyle, disabled: brandBusy, onClick: saveBrand, children: brandBusy ? 'Saving…' : 'Save brand' }),
+          jsx('button', { style: btnStyle, onClick: function () { setBrandForm(null) }, children: 'Cancel' })
+        ] })
+      ] })
+    } else {
+      var p = identity.payload
+      var rows = [
+        ['Who you help', p.who_you_help],
+        ['Audience', p.audience],
+        ['Mission', p.mission],
+        ['Story', p.story],
+        ['Pillars', joinList(p.pillars)],
+        ['Beliefs', joinList(p.beliefs)],
+        ['Never say', p.against],
+        ['Voice examples', (p.voice_examples || []).join(' / ')],
+        ['Never use', joinList(p.voice_donts)]
+      ]
+      body = jsxs('div', { style: cardStyle, children: [
+        jsx('h3', { children: 'Brand — v' + identity.version + ' (' + (p.origin || 'unknown') + ')' }),
+        p.origin === 'seed' ? jsx('p', { style: mutedStyle, children: "This is Foundry's demo brand. Say 'foundry start' in chat to set up your own — or edit it here." }) : null,
+        jsxs('div', { children: rows.map(function (r) {
+          return jsx('p', { key: r[0], children: [jsx('strong', { key: 'l', children: r[0] + ': ' }), r[1] || '—'] })
+        }) }),
+        jsx('button', { style: btnStyle, onClick: startBrandEdit, children: 'Edit brand' })
+      ] })
+    }
   } else if (tab === 'score') {
     body = jsxs('div', { children: perf.map(function (p) {
       return jsxs('div', { key: p.id, style: cardStyle, children: [
@@ -123,9 +226,10 @@ function FoundryPage({ rest }) {
     jsx('h2', { children: 'Foundry — five bots, one ledger' }),
     error ? jsx('p', { style: { color: '#ff6b6b' }, children: error }) : null,
     jsxs('div', { children: [
-      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('proofing') }, children: 'Proofing Table' }),
-      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('score') }, children: 'Scorekeeper' }),
-      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('money') }, children: 'Bursar' })
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('proofing'); setBrandForm(null) }, children: 'Proofing Table' }),
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('brand'); setBrandForm(null) }, children: 'Brand' }),
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('score'); setBrandForm(null) }, children: 'Scorekeeper' }),
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('money'); setBrandForm(null) }, children: 'Bursar' })
     ] }),
     body
   ] })
@@ -134,7 +238,7 @@ function FoundryPage({ rest }) {
 export default {
   id: 'foundry',
   name: 'Foundry',
-  description: 'Creator plugin: Proofing Table, Scorekeeper and Bursar over one shared ledger.',
+  description: 'Creator plugin: Proofing Table, Brand tab, Scorekeeper and Bursar over one shared ledger. Say "foundry start" to set up your brand.',
   defaultEnabled: false,
   register(ctx) {
     var rest = ctx.rest
@@ -156,7 +260,7 @@ export default {
         data: {
           id: 'foundry.open',
           label: 'Open Foundry',
-          keywords: ['foundry', 'proofing', 'drafts'],
+          keywords: ['foundry', 'proofing', 'drafts', 'brand', 'onboarding'],
           run: function () { host.navigate('/foundry') }
         }
       }

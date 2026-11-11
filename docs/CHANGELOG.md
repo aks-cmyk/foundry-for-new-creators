@@ -114,6 +114,58 @@ All notable changes to Foundry, newest first. Format is
 
 ## [Unreleased]
 
+### Onboarding — foundry_start + Brand tab — 2026-11-11 (Amit's call)
+
+Amit's user-flow notes: a first run should offer "foundry start",
+the plugin should be invokable, the interview's brand should be in a
+dashboard tab (viewable + editable), and onboarding must be complete
+— without it the plugin is "just a skill lite". Verified in code
+before building: `cartographer_interview` existed but nothing called
+it; the only Identity Card was the seeded demo one; the dashboard had
+no Brand tab. Built, no shortcuts:
+- **`foundry_start` tool (8th tool).** Two steps, one tool: step
+  `begin` returns the 9 Cartographer interview questions (ask one at
+  a time; only `who_you_help` required); step `complete` with answers
+  writes the Identity Card (versioned, supersedes the previous).
+  Lists arrive as arrays or comma-separated strings.
+- **Origin marking.** Identity payloads carry `origin`: `"seed"`
+  (demo data), `"interview"` (foundry_start), `"dashboard-edit"`
+  (Brand tab save). `is_onboarded` is true once a non-seed brand
+  exists. The seeded identity-001 is marked `"seed"` in seed.json.
+- **Draft guard.** `foundry_draft_create` refuses the seeded demo
+  brand and points at `foundry_start`. Drafting with a real brand
+  works unchanged; the demo and the tests call `bots.scribe_draft`
+  directly and are unaffected.
+- **Brand tab (4th tab, web + Desktop).** Shows the current brand
+  (with a demo-brand banner when it is still the seed) and an edit
+  form; saving POSTs to a new `/brand` endpoint that merges fields
+  and writes a NEW Identity version (`created_by: "dashboard"`,
+  origin `"dashboard-edit"` — never "human"). Unknown fields and an
+  empty `who_you_help` are rejected.
+- **Desktop mirrors it:** Brand tab + the same all-drafts vertical
+  stack with per-draft note boxes (the Desktop Proofing Table had
+  the same latest-only shape as the web one).
+- `plugin.yaml` description leads with "say 'foundry start'";
+  `docs/SPEC.md` (§3 rule 5, §5.2, §7) and `docs/ARCHITECTURE.md`
+  updated; smoke test's tool count 7 → 8.
+
+#### Verified (VM, Hermes v0.23.0, Python 3.12, 2026-11-11)
+- New `tests/test_onboarding.py`: 13 tests — begin/complete,
+  required-field and list handling, onboarded state, draft guard
+  (refuses demo brand, allows interview brand), Brand save (new
+  version, old untouched, dashboard authorship, rejects empty
+  who_you_help / unknown fields / wrong kind), seed marked demo.
+- Full suite: unittest 25/25 (12 + 13 new); smoke 34/34;
+  `hermes plugins validate` PASS 16/16; `hermes plugins doctor`
+  PASS 8 tools, 0 hooks.
+- SSR render against the real host UI components: proofing (both
+  drafts, newest first), **brand tab (v2 interview card, all fields,
+  Edit button)**, score, money — all render.
+- Live check still pending on Amit's Mac Studio: the interview
+  itself needs a live model (the VM has none), plus the Brand tab
+  edit in the real dashboard. Steps added to
+  `docs/MAC_STUDIO_CHECK.md` (§6).
+
 ### Dashboard redesign — vertical card feed — 2026-11-11 (Amit's call)
 
 After the Tabs fix, the live dashboard rendered on Mac Studio (three

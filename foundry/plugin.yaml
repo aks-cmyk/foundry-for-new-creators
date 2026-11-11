@@ -7,7 +7,7 @@ version: 0.1.0
 manifest_version: 2
 api_version: 1
 license: MIT
-description: "Foundry — a creator plugin: five bots (Cartographer, Lookout, Scribe, Scorekeeper, Bursar) sharing one structured memory ledger, with a Proofing Table and Score/Money dashboards. Approval is disabled — no trusted human review channel yet; Tweak/Reject feedback is recorded as unverified. No auto-post."
+description: "Foundry — a creator plugin: five bots (Cartographer, Lookout, Scribe, Scorekeeper, Bursar) sharing one structured memory ledger, with a Proofing Table, a Brand tab, and Score/Money dashboards. Start here: say 'foundry start' — a short interview sets up your brand. Approval is disabled — no trusted human review channel yet; Tweak/Reject feedback is recorded as unverified. No auto-post."
 author: Amit Srivastava
 # homepage: UNVERIFIED — no repo URL yet. Add the real GitHub repo URL
 # here before any catalog PR; do not invent one.
@@ -16,6 +16,7 @@ author: Amit Srivastava
 requires_hermes: ">=0.21.5"
 tags: [creator, content, analytics, business]
 provides_tools:
+  - foundry_start
   - foundry_ledger_list
   - foundry_ledger_get
   - foundry_draft_create

@@ -274,6 +274,19 @@ Verification (VM, Hermes v0.23.0, 2026-11-11):
   enabled" until this round).
 - Live re-test on Amit's Mac Studio still pending (fresh zip v3).
 
+### Fifth round — onboarding (foundry_start + Brand tab)
+
+Amit's call, same evening: the interview existed as a function
+nobody could call, and the brand was invisible. `foundry_start`
+(8th tool, two-step interview → Identity Card), origin marking
+(seed/interview/dashboard-edit), draft guard refusing the demo
+brand, Brand tab on web + Desktop with a real edit form backed by
+POST /brand (new version, dashboard authorship, never "human").
+Verified: new tests/test_onboarding.py 13/13; full suite 25/25;
+smoke 34/34; validate 16/16; doctor 8 tools; SSR renders all four
+tabs incl. the Brand tab. Live check pending on Mac Studio — the
+interview needs a live model (see docs/MAC_STUDIO_CHECK.md §6).
+
 ### Redesign — vertical card feed (same evening, Amit's call)
 
 After the Tabs fix rendered live, Amit asked for all drafts (not
