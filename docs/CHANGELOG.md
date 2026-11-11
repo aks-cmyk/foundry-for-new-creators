@@ -23,7 +23,7 @@ are SemVer.
 - `scripts/seed.py`, `scripts/render_dashboard.py`, `scripts/demo.py`;
   `Makefile` (`test`, `demo`, `seed`, `clean`); `tests/test_smoke.py`.
 - Static dashboard render (`dashboard/index.html`, generated, git-ignored)
-  with three tabs: Proofing Table / Scorekeeper / Bursar.
+  with three tabs: Proofing Table / Inspector / Paymaster.
 
 ### Verified
 - Smoke test passes locally (Python 3.12, stdlib only, no network):
@@ -39,7 +39,7 @@ are SemVer.
 - Desktop (`desktop/plugin.js`) surface: not built at 0.1.0; web dashboard only. (Built in 0.1.2 — see below.)
 - No catalog PR, no demo video, no Typeform submission.
 
-## [0.1.1] — 2026-11-06 — Hermes CLI install + validation + live Scribe wiring
+## [0.1.1] — 2026-11-06 — Hermes CLI install + validation + live Smith wiring
 
 ### Added
 - Hermes CLI installed (official route) in the workspace:
@@ -47,7 +47,7 @@ are SemVer.
   `hidden_files/hermes-home/`; git-ignored). Install log:
   `hidden_files/install-2026-11-06.log`.
 - `docs/VALIDATION.md`: full validate/doctor record.
-- Live Scribe: `scribe_revise(..., llm_complete=None)` calls the host
+- Live Smith: `scribe_revise(..., llm_complete=None)` calls the host
   LLM via `ctx.llm.complete()` when a ctx is bound
   (`tools.bind_ctx(ctx)` in `register()`), with rule-based fallback on
   any failure; revised cards record `"generation": "llm" | "rule-based"`.
@@ -71,7 +71,7 @@ are SemVer.
 - `ctx.llm` call shape and trust gate verified from installed source
   (`agent/plugin_llm.py`); `ctx.register_skill` signature verified
   (`hermes_cli/plugins_content.py`); **no `ctx` web-search surface
-  exists in v0.23.0** — Lookout stays agent-supplied.
+  exists in v0.23.0** — Prospector stays agent-supplied.
 
 ## [0.1.2] — 2026-11-06 — Ledger fix + feedback buttons + Desktop half
 
@@ -210,7 +210,7 @@ before building: `cartographer_interview` existed but nothing called
 it; the only Identity Card was the seeded demo one; the dashboard had
 no Brand tab. Built, no shortcuts:
 - **`foundry_start` tool (8th tool).** Two steps, one tool: step
-  `begin` returns the 9 Cartographer interview questions (ask one at
+  `begin` returns the 9 Patternmaker interview questions (ask one at
   a time; only `who_you_help` required); step `complete` with answers
   writes the Identity Card (versioned, supersedes the previous).
   Lists arrive as arrays or comma-separated strings.
@@ -271,7 +271,7 @@ be nicer. Redone in `foundry/dashboard/dist/index.js` (same file):
   phone-like feed; draft text wraps (`pre-wrap`) inside it.
 - Feedback is per-draft now (`sendFeedback(draftId, ...)`); each
   card's Tweak/Reject acts on its own draft.
-- Scorekeeper/Bursar tabs use the same vertical stack.
+- Inspector/Paymaster tabs use the same vertical stack.
 
 #### Verified (VM, Hermes v0.23.0, Python 3.12, 2026-11-11)
 - SSR render against the REAL host UI components, state seeded with
@@ -368,9 +368,9 @@ identity that must never go public).
 - **LICENSE / copyright holder: DECIDED Nov 10, 2026** — MIT,
   Copyright (c) 2026 Amit Srivastava; LICENSE file added (commit
   `8279a3c`).
-- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio (draft-003, `generation: "llm"`, Nov 10, 2026); the draft-003 correction (back to Foundry framing) is pending Amit's pick. Live web dashboard load: blank page on first run, root cause found + fixed (Tabs render-prop, see top of this section) — live re-test pending. Live Desktop load: still unverified.
+- Live Smith via `ctx.llm`: VERIFIED on Mac Studio (draft-003, `generation: "llm"`, Nov 10, 2026); the draft-003 correction (back to Foundry framing) is pending Amit's pick. Live web dashboard load: blank page on first run, root cause found + fixed (Tabs render-prop, see top of this section) — live re-test pending. Live Desktop load: still unverified.
 - Trusted human approval: explicitly not provided (see above).
-- Lookout live search (needs a `ctx` surface or MCP route — none
-  verified); Scorekeeper/Bursar live analytics + money imports;
+- Prospector live search (needs a `ctx` surface or MCP route — none
+  verified); Inspector/Paymaster live analytics + money imports;
   catalog PR (needs catalog entry format read + a real repo URL for
   `homepage`); demo video; Typeform submission.

@@ -97,7 +97,7 @@ Plugin Doctor:
   `hermes dashboard` is still **UNVERIFIED** — it needs a running
   gateway/model, which this task cannot set up (no credentials).
 - **Live LLM calls**: doctor runs `register()` only, never the tool
-  handlers, so the live Scribe path (`ctx.llm.complete`) is wired and
+  handlers, so the live Smith path (`ctx.llm.complete`) is wired and
   unit-tested with a fake LLM, but no real completion has run.
 
 ## Fixes made (this validation round)
@@ -222,7 +222,7 @@ Adoption commit `d257c2b` (candidate `bde3c03`); fixture fixes commit
   Approve label, with no `approved` wording.
 
 ### Still NOT covered after adoption
-- Live Scribe via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test done Nov 10, 11:15 PM — tabs render (three tabs at the time). Redesign + Brand tab confirmed live Nov 11 — Amit: all four tabs render. Live Desktop load — wired and statically verified only.
+- Live Smith via `ctx.llm`: VERIFIED on Mac Studio Nov 10, 2026 (draft-003, `generation: "llm"`). Live web dashboard load: blank page on first Mac Studio run; root cause found in the host source and fixed (Tabs render-prop — see "Fourth round" below); live re-test done Nov 10, 11:15 PM — tabs render (three tabs at the time). Redesign + Brand tab confirmed live Nov 11 — Amit: all four tabs render. Live Desktop load — wired and statically verified only.
 - **Trusted human approval — explicitly NOT provided.** Approval is
   disabled, not implemented. See `docs/APPROVAL_CHECKPOINT.md`.
 - **Scoped memory as a product capability** — module only; nothing
@@ -355,7 +355,7 @@ its payload (`foundry/data/seed.json`); `foundry_ledger_list` returns
 data. No dashboard-code change — the Proofing Tables render `d.title`,
 so the Demo titles show automatically. `foundry/README.md` gained
 "How a cycle flows" and "Demo content" sections; the root README's
-stale facts were fixed (four tabs, 8 tools, live Scribe verified).
+stale facts were fixed (four tabs, 8 tools, live Smith verified).
 Known limit: the ledger lives in `plugin_db("foundry")`, which survives
 plugin updates — an existing install keeps its old seeded cards (old
 titles, no origin); the draft guard and Brand-tab banner still apply

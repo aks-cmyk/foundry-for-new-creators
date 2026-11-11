@@ -80,7 +80,7 @@
     // in the title tooltip: "Approval unavailable — trusted human
     // review not wired".
     function doTweak(draftId) {
-      var note = window.prompt("Tweak — one-line note for Scribe:", "sharper hook");
+      var note = window.prompt("Tweak — one-line note for Smith:", "sharper hook");
       if (note === null) { return; } // cancelled
       sendFeedback(draftId, "tweak", note);
     }
@@ -243,8 +243,8 @@
           React.createElement(TabsList, null,
             React.createElement(TabsTrigger, { active: tab === "proofing", value: "proofing", onClick: function () { setTab("proofing"); } }, "Proofing Table"),
             React.createElement(TabsTrigger, { active: tab === "brand", value: "brand", onClick: function () { setTab("brand"); } }, "Brand"),
-            React.createElement(TabsTrigger, { active: tab === "score", value: "score", onClick: function () { setTab("score"); } }, "Scorekeeper"),
-            React.createElement(TabsTrigger, { active: tab === "money", value: "money", onClick: function () { setTab("money"); } }, "Bursar")),
+            React.createElement(TabsTrigger, { active: tab === "score", value: "score", onClick: function () { setTab("score"); } }, "Inspector"),
+            React.createElement(TabsTrigger, { active: tab === "money", value: "money", onClick: function () { setTab("money"); } }, "Paymaster")),
           body);
       }));
   }

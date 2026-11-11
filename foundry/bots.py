@@ -3,13 +3,13 @@
 Bots are pure functions over the ledger. They never talk to each other
 directly; they only read/write ledger cards (see docs/ARCHITECTURE.md).
 
-MVP honesty: Scribe's revision uses the host LLM via ctx.llm when a
+MVP honesty: Smith's revision uses the host LLM via ctx.llm when a
 ctx is bound (see tools.bind_ctx), falling back to the deterministic
 rule-based rewrite when no ctx is bound or the LLM call fails — the
 card payload records "generation": "llm" or "rule-based" so the
-provenance is visible. Lookout does not fetch the web — Evidence
+provenance is visible. Prospector does not fetch the web — Evidence
 Cards come from seed data or user-supplied sources: no ctx web-search
-surface exists in Hermes v0.23.0 (checked 2026-11-06), so Lookout
+surface exists in Hermes v0.23.0 (checked 2026-11-06), so Prospector
 stays agent-supplied. ctx.llm call shape VERIFIED against installed
 Hermes v0.23.0 (agent/plugin_llm.py): PluginLlm.complete(messages,
 temperature=..., max_tokens=..., timeout=..., purpose=...) ->
@@ -95,10 +95,10 @@ def lookout_evidence(conn, *, topic: str, sources: list[dict],
 def scribe_draft(conn, *, evidence_id: str, identity_id: str,
                  hook: str, body: list[str]) -> dict:
     """Create a Draft Card. Refuses if the Evidence Card does not exist
-    — Scribe cannot draft without citing evidence."""
+    — Smith cannot draft without citing evidence."""
     evidence = ledger.get_card(conn, evidence_id)
     if evidence is None or evidence["kind"] != "evidence":
-        raise ValueError(f"no valid Evidence Card {evidence_id}: Scribe cannot draft without evidence")
+        raise ValueError(f"no valid Evidence Card {evidence_id}: Smith cannot draft without evidence")
     identity = ledger.get_card(conn, identity_id)
     if identity is None or identity["kind"] != "identity":
         raise ValueError(f"no valid Identity Card {identity_id}")
@@ -119,7 +119,7 @@ def scribe_draft(conn, *, evidence_id: str, identity_id: str,
 
 
 def _sharpen_hook(hook: str) -> str:
-    """MVP rule-based revision for a 'sharper hook' note. A live Scribe
+    """MVP rule-based revision for a 'sharper hook' note. A live Smith
     would rewrite via the model; this deterministic rule keeps the
     demo loop working without an API key."""
     if hook.endswith(":"):
@@ -146,7 +146,7 @@ def _llm_revise_text(llm_complete, *, draft_text: str, note: str,
                  "; ".join(evidence["payload"].get("confirmed", [])))
     messages = [
         {"role": "system", "content":
-         "You are Scribe, the writer bot of a creator plugin. Revise the "
+         "You are Smith, the writer bot of a creator plugin. Revise the "
          "X thread draft below per the human's one-line note. Keep it an "
          "X thread (short posts, one idea each). " + voice + " " + facts +
          " Reply with JSON only: {\"hook\": \"...\", \"body\": [\"post 1\", ...]}."},

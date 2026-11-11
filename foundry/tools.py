@@ -18,7 +18,7 @@ from . import bots, ledger, storage
 _DB_PATH = None  # kept for introspection; set_db_path() writes storage.
 
 # PluginContext bound by register() in __init__.py. None outside Hermes
-# (smoke tests, make demo) — Scribe then uses the rule-based rewrite.
+# (smoke tests, make demo) — Smith then uses the rule-based rewrite.
 _CTX = None
 
 
@@ -72,7 +72,7 @@ def _handler(fn):
     return wrapper
 
 
-# Cartographer interview — the questions foundry_start asks, in order.
+# Patternmaker interview — the questions foundry_start asks, in order.
 # Keys match cartographer_interview's answers dict; only who_you_help
 # is required. Lists arrive as arrays or comma-separated strings.
 INTERVIEW_QUESTIONS = [
@@ -90,7 +90,7 @@ INTERVIEW_QUESTIONS = [
 
 @_handler
 def foundry_start(args, **kwargs):
-    """Cartographer onboarding — the front door. Two steps, one tool:
+    """Patternmaker onboarding — the front door. Two steps, one tool:
     step 'begin' returns the interview questions (the agent asks them
     one at a time, in order); step 'complete' with answers writes the
     Identity Card. Only who_you_help is required. A bare call (no step)
@@ -121,7 +121,7 @@ def foundry_start(args, **kwargs):
                     answers[key] = [s.strip() for s in v.replace("\n", ",").split(",") if s.strip()]
             card = bots.cartographer_interview(conn, answers)
             return _ok({"identity": card, "onboarded": True,
-                        "note": "Brand set. Scribe now drafts in this brand's voice; "
+                        "note": "Brand set. Smith now drafts in this brand's voice; "
                         "see it on the Brand tab."})
         return _err("step must be 'begin' or 'complete'")
 

@@ -10,7 +10,7 @@ def _str(desc):
 
 FOUNDRY_START = {
     "name": "foundry_start",
-    "description": "Cartographer: start Foundry — the onboarding interview that sets up the creator's brand. Say 'foundry start' to run this. Call with step 'begin' (or no arguments) to get the interview questions; ask them one at a time, in order. Then call again with step 'complete' and the answers to write the Identity Card. Only who_you_help is required. Until a brand exists, Scribe cannot draft in the user's voice — drafting with the demo brand is refused.",
+    "description": "Patternmaker: start Foundry — the onboarding interview that sets up the creator's brand. Say 'foundry start' to run this. Call with step 'begin' (or no arguments) to get the interview questions; ask them one at a time, in order. Then call again with step 'complete' and the answers to write the Identity Card. Only who_you_help is required. Until a brand exists, Smith cannot draft in the user's voice — drafting with the demo brand is refused.",
     "parameters": _obj({"step": _str("begin: get the interview questions. complete: write the Identity Card from answers."),
                         "answers": {"type": "object",
                                     "description": "Interview answers keyed by question: who_you_help (required), audience, story, pillars (up to 3), beliefs, against, voice_examples (up to 5), voice_donts, mission. Lists may be given as arrays or comma-separated strings."}},
@@ -32,7 +32,7 @@ FOUNDRY_LEDGER_GET = {
 
 FOUNDRY_DRAFT_CREATE = {
     "name": "foundry_draft_create",
-    "description": "Scribe: create a Draft Card (X thread) from an Evidence Card and an Identity Card. Refuses if the evidence does not exist — Scribe cannot draft without cited evidence.",
+    "description": "Smith: create a Draft Card (X thread) from an Evidence Card and an Identity Card. Refuses if the evidence does not exist — Smith cannot draft without cited evidence.",
     "parameters": _obj({"evidence_id": _str("Evidence Card id to cite."),
                         "identity_id": _str("Identity Card id to write in voice of."),
                         "hook": _str("First line of the thread."),
@@ -43,7 +43,7 @@ FOUNDRY_DRAFT_CREATE = {
 
 FOUNDRY_DRAFT_FEEDBACK = {
     "name": "foundry_draft_feedback",
-    "description": "Record feedback on a draft (tweak / reject with a one-line note; approve is disabled — no trusted human review channel yet). On tweak, Scribe returns a revised draft as a new version; the original is never changed. Feedback is recorded as unverified, never as human authorship.",
+    "description": "Record feedback on a draft (tweak / reject with a one-line note; approve is disabled — no trusted human review channel yet). On tweak, Smith returns a revised draft as a new version; the original is never changed. Feedback is recorded as unverified, never as human authorship.",
     "parameters": _obj({"draft_id": _str("Draft Card id."),
                         "feedback_type": _str("approve, tweak, or reject."),
                         "note": _str("One-line note, e.g. 'sharper hook'. Required for tweak/reject.")},
@@ -58,13 +58,13 @@ FOUNDRY_DRAFT_APPROVE = {
 
 FOUNDRY_SCORECARD = {
     "name": "foundry_scorecard",
-    "description": "Scorekeeper: performance summary for a draft, with a repeat / drop / retry verdict.",
+    "description": "Inspector: performance summary for a draft, with a repeat / drop / retry verdict.",
     "parameters": _obj({"draft_id": _str("Draft Card id.")}, ["draft_id"]),
 }
 
 FOUNDRY_MONEY_SUMMARY = {
     "name": "foundry_money_summary",
-    "description": "Bursar: profit summary (costs, revenue, profit in cents) for a draft, client, or period. Tax figures are tracking estimates only.",
+    "description": "Paymaster: profit summary (costs, revenue, profit in cents) for a draft, client, or period. Tax figures are tracking estimates only.",
     "parameters": _obj({"draft_id": _str("Draft Card id (optional)."),
                         "client": _str("Client name, default 'self'.")}, []),
 }

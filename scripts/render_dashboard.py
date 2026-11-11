@@ -2,11 +2,11 @@
 
 Reads the seeded ledger (data/foundry.db, seeding first if missing)
 and writes dashboard/index.html with four tabs: Proofing Table /
-Brand / Scorekeeper / Bursar. The Proofing Table lists all drafts
+Brand / Inspector / Paymaster. The Proofing Table lists all drafts
 newest-first, mirroring the live dashboard; the Brand tab shows the
 Identity Card. Feedback (Tweak / Reject) works
 client-side: Tweak sharpens the hook and shows v2, mirroring the
-Scribe revision rule in foundry/bots.py. Approve is disabled — no
+Smith revision rule in foundry/bots.py. Approve is disabled — no
 trusted human review channel exists yet (see
 docs/APPROVAL_CHECKPOINT.md). This is a demo artifact —
 the real dashboard extension is foundry/dashboard/ (see ARCHITECTURE.md).
@@ -106,7 +106,7 @@ def render() -> Path:
         for c in money)
 
     doc = f"""<!doctype html><html lang='en'><head><meta charset='utf-8'>
-<title>Foundry — Proofing Table / Brand / Scorekeeper / Bursar</title>
+<title>Foundry — Proofing Table / Brand / Inspector / Paymaster</title>
 <style>body{{font-family:system-ui,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;background:#0f0f0f;color:#eee}}
 .card{{border:1px solid #444;border-radius:8px;padding:12px;margin:12px 0;background:#161616}}
 .muted{{color:#999;font-size:.85em}}button{{margin-right:8px;padding:6px 12px;cursor:pointer}}
@@ -116,12 +116,12 @@ pre{{white-space:pre-wrap}}.tab{{display:none}}.tab.active{{display:block}}
 <p class='muted'>Seeded demo data — performance numbers are estimated, not real metrics. Approval is disabled — no trusted human review channel yet; nothing auto-posts.</p>
 <p><button class='tabbtn' onclick="show('proofing')">Proofing Table</button>
 <button class='tabbtn' onclick="show('brand')">Brand</button>
-<button class='tabbtn' onclick="show('score')">Scorekeeper</button>
-<button class='tabbtn' onclick="show('money')">Bursar</button></p>
+<button class='tabbtn' onclick="show('score')">Inspector</button>
+<button class='tabbtn' onclick="show('money')">Paymaster</button></p>
 <div id='proofing' class='tab active'><h2>Proofing Table</h2>{proof or '<p>No drafts yet.</p>'}</div>
 <div id='brand' class='tab'><h2>Brand</h2>{brand_html or '<p>No brand yet. Say ‘foundry start’ in chat to set up your own.</p>'}</div>
-<div id='score' class='tab'><h2>Scorekeeper</h2>{score or '<p>No performance cards yet.</p>'}</div>
-<div id='money' class='tab'><h2>Bursar</h2>{bursar or '<p>No money cards yet.</p>'}
+<div id='score' class='tab'><h2>Inspector</h2>{score or '<p>No performance cards yet.</p>'}</div>
+<div id='money' class='tab'><h2>Paymaster</h2>{bursar or '<p>No money cards yet.</p>'}
 <p class='muted'>Tax figures are tracking estimates only — no advice, no filing.</p></div>
 <script>
 function show(id){{document.querySelectorAll('.tab').forEach(function(t){{t.classList.remove('active')}});document.getElementById(id).classList.add('active');}}
@@ -132,8 +132,8 @@ function feedback(kind, id){{
     var t=el.textContent; var first=t.split('\\n\\n')[0];
     var sharp=first.replace(/\\.$/,'')+': here is the fix, in one thread.';
     el.textContent=t.replace(first, sharp);
-    msg.textContent='Revision Card recorded (tweak — sharper hook). Scribe returned v2 — see the sharpened hook above.';}}
-  else {{msg.textContent='Rejected — reason required. Revision Card recorded; Scribe will not re-draft without a new note.';}}
+    msg.textContent='Revision Card recorded (tweak — sharper hook). Smith returned v2 — see the sharpened hook above.';}}
+  else {{msg.textContent='Rejected — reason required. Revision Card recorded; Smith will not re-draft without a new note.';}}
 }}
 </script></body></html>"""
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,8 @@
 # Mac Studio live check — Foundry
 
 Purpose: close the last two UNVERIFIED items from the VM validation —
-a real `ctx.llm` Scribe revision, and a live dashboard load — on Amit's
-Mac Studio, where his real Hermes lives. Both are now done: live Scribe
+a real `ctx.llm` Smith revision, and a live dashboard load — on Amit's
+Mac Studio, where his real Hermes lives. Both are now done: live Smith
 verified Nov 10, 2026 (draft-003, `generation: "llm"`); live dashboard
 load verified Nov 10, 11:15 PM (tabs render). Remaining unverified:
 the Desktop load and the draft-003
@@ -16,8 +16,8 @@ Status before this check (VM, 2026-11-06):
 - Smoke test 34/34 PASS. Ledger now lives at `plugin_db("foundry")`;
   dashboard buttons are wired to a real `POST /feedback`; a Desktop
   GUI half (`foundry/desktop/plugin.js`) is built — see step 5.
-- Live Scribe wired via verified `ctx.llm` shape, but never run
-  against a real model. Lookout stays stubbed (no `ctx` web-search
+- Live Smith wired via verified `ctx.llm` shape, but never run
+  against a real model. Prospector stays stubbed (no `ctx` web-search
   surface in v0.23.0).
 - Full record: `docs/VALIDATION.md`.
 
@@ -57,13 +57,13 @@ the eighth is `foundry_start`, which restored the count to 8 after the
 If doctor shows 0 tools, or validate fails, stop and send Zuzu the
 full output — do not work around it.
 
-## 3. Live Scribe test (real LLM, no posting)
+## 3. Live Smith test (real LLM, no posting)
 
 In Hermes, ask for a Foundry draft revision using the seeded data, e.g.:
 
 > Revise draft-002 with the feedback "sharper hook"
 
-Expected: Scribe returns a v3 draft, and the Revision Card records
+Expected: Smith returns a v3 draft, and the Revision Card records
 `"generation": "llm"` (not `"rule-based"`). That is the proof the live
 `ctx.llm` path works. Nothing is posted anywhere — this is a draft
 revision only.
@@ -77,7 +77,7 @@ hermes dashboard
 ```
 
 Open the Foundry tab. Expected: all four tabs render —
-Proofing Table, Brand, Scorekeeper, Bursar — over the 9 seeded cards,
+Proofing Table, Brand, Inspector, Paymaster — over the 9 seeded cards,
 with the v2 hook "Your last 100 posts taught your tools nothing…".
 
 Report back: which tabs rendered, and anything blank / broken.
@@ -88,7 +88,7 @@ In the Hermes Desktop app:
 1. Open **Capabilities → Plugins**, find **Foundry**, flip it on.
    (It ships opt-in, so it will be listed but off until you enable it.)
 2. Open the **Foundry** page from the sidebar. Expected: the same
-   four tabs — Proofing Table, Brand, Scorekeeper, Bursar — over the 9
+   four tabs — Proofing Table, Brand, Inspector, Paymaster — over the 9
    seeded cards.
 3. On the Proofing Table, try **Tweak** with the note "sharper hook".
    Expected: a v3 draft comes back on the board (no pop-up alert —
@@ -130,7 +130,7 @@ and did the edit save as v3?
 
 - `hermes --version` output
 - validate + doctor output (pass/fail, tool count)
-- Scribe v3 result: `llm` or `rule-based`?
+- Smith v3 result: `llm` or `rule-based`?
 - Web dashboard: which tabs rendered?
 - Desktop: did the Foundry page appear, and did Tweak return v3?
 - Onboarding: did the interview run, what did the Brand tab show, and did the edit save as v3?

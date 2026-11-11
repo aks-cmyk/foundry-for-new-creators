@@ -84,7 +84,7 @@ def summary():
 def feedback(body: dict):
     """Human feedback from the Proofing Table (web or Desktop).
     Body: {"draft_id": ..., "feedback_type": "approve"|"tweak"|"reject",
-    "note": "..."} — note required for tweak/reject. On tweak, Scribe
+    "note": "..."} — note required for tweak/reject. On tweak, Smith
     returns a revised draft as a new version; the original is never
     changed. Returns {"ok": true, "revision": ..., "revised_draft"|"draft": ...}
     or {"ok": false, "error": ...}."""

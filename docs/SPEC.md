@@ -24,7 +24,7 @@ on X, and a thread is a bounded, demoable unit. Other platforms are
 backlog, not MVP.
 
 **Non-goals for the hackathon:** auto-posting, auto-sending, auto-buying.
-A human approves anything public. Bursar gives no tax advice and files
+A human approves anything public. Paymaster gives no tax advice and files
 nothing. Foundry never invents a fact, a number, a quote or a source.
 
 ## 2. Positioning — not Eden
@@ -37,8 +37,8 @@ income-streams guide, even though both informed the idea.
 | garden, brand board | workshop, ledger, foundry |
 | creative team, one-person creative team | crew, stations, bots |
 | intellectual signature | Identity Card |
-| brand strategist / content strategist | Cartographer / Lookout |
-| content calendar / scheduling | Proofing Table, Scorekeeper |
+| brand strategist / content strategist | Patternmaker / Prospector |
+| content calendar / scheduling | Proofing Table, Inspector |
 
 Design language: workshop + ledger. Dark, utilitarian, cards with
 provenance (who wrote this, from what source, when, what version).
@@ -52,25 +52,25 @@ and the money side is a first-class citizen, not an afterthought.**
 
 | Bot | Job | Reads | Writes |
 |---|---|---|---|
-| **Cartographer** | Interview bot. Maps identity, niche, audience, voice, what you will not say. | Past Identity Cards, top Performance Cards | Identity Card (versioned) |
-| **Lookout** | Scout. Sourced research in the niche. | Identity Card, past Performance Cards (what worked) | Evidence Card (with source links) |
-| **Scribe** | Writer. Drafts only from cited Evidence Cards. | Identity Card, Evidence Card, Revision Cards | Draft Card (v1, v2, …) |
-| **Scorekeeper** | Manager. Analytics: what landed, repeat / drop. | Draft Card, Performance Card history | Performance Card |
-| **Bursar** | Business ops. Costs, profit per post/client, partnerships, tax tracking. | Draft Card, Performance Card, deal records | Money Card, Partnership record, Tax record |
+| **Patternmaker** | Interview bot. Maps identity, niche, audience, voice, what you will not say. | Past Identity Cards, top Performance Cards | Identity Card (versioned) |
+| **Prospector** | Scout. Sourced research in the niche. | Identity Card, past Performance Cards (what worked) | Evidence Card (with source links) |
+| **Smith** | Writer. Drafts only from cited Evidence Cards. | Identity Card, Evidence Card, Revision Cards | Draft Card (v1, v2, …) |
+| **Inspector** | Manager. Analytics: what landed, repeat / drop. | Draft Card, Performance Card history | Performance Card |
+| **Paymaster** | Business ops. Costs, profit per post/client, partnerships, tax tracking. | Draft Card, Performance Card, deal records | Money Card, Partnership record, Tax record |
 
 Rules that make the crew a system, not a list:
 
-1. **Scribe cannot draft without citing an Evidence Card.** A claim
+1. **Smith cannot draft without citing an Evidence Card.** A claim
    with no source is cut, not hedged.
 2. **Feedback is a card, not a chat message.** Tweak / Reject on
    the Proofing Table writes a Revision Card, linked to the Draft
-   Card. Scribe reads Revision Cards before writing v2. Approve is
+   Card. Smith reads Revision Cards before writing v2. Approve is
    disabled — the approve tool and the approve feedback route error
    before writing anything, so no Revision Card is ever written for
    an approval.
-3. **Performance and money write back.** Scorekeeper and Bursar write
-   Performance / Money Cards linked to the Draft Card. Lookout reads
-   them next cycle and avoids dead angles; Scribe reads them and
+3. **Performance and money write back.** Inspector and Paymaster write
+   Performance / Money Cards linked to the Draft Card. Prospector reads
+   them next cycle and avoids dead angles; Smith reads them and
    repeats winning formats.
 4. **A human is the editor.** Drafts are drafts until a human approves
    them on the Proofing Table. Nothing posts itself. (Currently
@@ -78,11 +78,11 @@ Rules that make the crew a system, not a list:
    trusted human review channel exists; see
    `docs/APPROVAL_CHECKPOINT.md`.)
 5. **Onboarding is the front door, not a doc.** A new user says
-   "foundry start": Cartographer asks nine questions (who you help,
+   "foundry start": Patternmaker asks nine questions (who you help,
    audience, story, pillars, beliefs, what you will never say, voice
    examples, words you never use, mission — only the first is
    required) and writes the Identity Card. Until a real brand exists,
-   Scribe refuses to draft in the seeded demo brand's voice. The
+   Smith refuses to draft in the seeded demo brand's voice. The
    brand is visible and editable on the Brand tab. Without this the
    plugin is a skill with a dashboard — the interview is what makes
    it a product. The interview runs one question at a time, in order,
@@ -114,7 +114,7 @@ One SQLite database, six card kinds, all versioned, all with provenance:
   note, author (unverified — feedback is never recorded as human),
   linked draft, applied in v(n+1) or not.
 - **Performance Card** — views, likes, reposts, replies, saves, and
-  the Scorekeeper verdict: repeat / drop / retry-differently.
+  the Inspector verdict: repeat / drop / retry-differently.
 - **Money Card** — costs (model/tool/time), revenue, profit, per post
   and per client; linked Partnership and Tax records.
 
@@ -138,7 +138,7 @@ One shell, four tabs, all reading the same ledger:
   disabled with an honest label, and the approve tool errors before
   writing anything) / **Tweak** (one-line note) / **Reject**
   (reason required). Optional inline edit.
-- On Tweak/Reject: Scribe returns a revised draft; the Revision Card
+- On Tweak/Reject: Smith returns a revised draft; the Revision Card
   is stored; the board updates. No full WYSIWYG editor in the MVP.
 
 ### 5.2 Brand tab
@@ -153,13 +153,13 @@ One shell, four tabs, all reading the same ledger:
 - If the current brand is still the seeded demo (`origin: "seed"`),
   the tab says so and points at `foundry start`.
 
-### 5.3 Scorekeeper dashboard
+### 5.3 Inspector dashboard
 
 - What worked, by pillar / format / hook. Top posts, underperformers.
 - One recommendation per cycle: repeat this, drop that.
 - Click a post → its draft, evidence, performance and money in one view.
 
-### 5.4 Bursar dashboard
+### 5.4 Paymaster dashboard
 
 - P&L per post, per client, per month. Cost breakdown (model, tools, time).
 - Brand-partnership pipeline: pitched → terms → delivered → paid,
@@ -168,7 +168,7 @@ One shell, four tabs, all reading the same ledger:
   CSV export. **Tracking only — no advice, no filing.**
 
 Cross-linking is the demo: a post that looks successful in
-Scorekeeper but lost money in Bursar (or vice versa) is a decision
+Inspector but lost money in Paymaster (or vice versa) is a decision
 no content-only tool can surface.
 
 ## 6. MVP cut vs backlog
@@ -176,12 +176,12 @@ no content-only tool can surface.
 ### MVP — must work flawlessly by Nov 11, 2 PM PST
 
 - One platform (X), one format (threads), one end-to-end loop:
-  Cartographer (seeded Identity Card) → Lookout (seeded Evidence
-  Card) → Scribe (Draft v1) → human feedback on Proofing Table →
-  Scribe (Draft v2) → Scorekeeper (Performance Card) → Bursar
+  Patternmaker (seeded Identity Card) → Prospector (seeded Evidence
+  Card) → Smith (Draft v1) → human feedback on Proofing Table →
+  Smith (Draft v2) → Inspector (Performance Card) → Paymaster
   (Money Card on the same draft).
 - Proofing Table working with seeded data, no live API keys.
-- Scorekeeper + Bursar dashboards as tabs of the same shell, seeded.
+- Inspector + Paymaster dashboards as tabs of the same shell, seeded.
 - Partnerships/tax as ledger tabs with **one seeded example deal**.
 - Plugin loads via `register(ctx)`; tools match `plugin.yaml`;
   `hermes plugins validate` / `doctor` run before any PR (UNVERIFIED
@@ -189,7 +189,7 @@ no content-only tool can surface.
 
 ### Post-hackathon backlog (explicitly NOT in the MVP)
 
-- Live Scribe via `ctx.llm` (wired, not live-tested); live Lookout web
+- Live Smith via `ctx.llm` (wired, not live-tested); live Prospector web
   search; live X / analytics / money imports.
 - Multi-platform (LinkedIn, Substack, YouTube), multi-format.
 - Partnership CRM beyond one seeded deal; tax integrations.
@@ -199,14 +199,14 @@ no content-only tool can surface.
 
 | Tool | What it does |
 |---|---|
-| `foundry_start` | **Onboarding (front door).** Cartographer interview: step `begin` returns the 9 questions (ask one at a time); step `complete` with answers writes the Identity Card. Only `who_you_help` is required. Say "foundry start" to run it. |
+| `foundry_start` | **Onboarding (front door).** Patternmaker interview: step `begin` returns the 9 questions (ask one at a time); step `complete` with answers writes the Identity Card. Only `who_you_help` is required. Say "foundry start" to run it. |
 | `foundry_ledger_list` | List ledger cards, filtered by kind / status |
 | `foundry_ledger_get` | Get one card (with its links) by id |
-| `foundry_draft_create` | Scribe: create a Draft Card from an Evidence Card + Identity Card. Refuses the seeded demo brand — run `foundry_start` first. |
+| `foundry_draft_create` | Smith: create a Draft Card from an Evidence Card + Identity Card. Refuses the seeded demo brand — run `foundry_start` first. |
 | `foundry_draft_feedback` | Record a Revision Card (tweak / reject) and, on tweak, return a revised draft; approve is disabled (no trusted human review channel yet) |
 | `foundry_draft_approve` | Approval is disabled — always errors until a trusted human review channel exists |
-| `foundry_scorecard` | Scorekeeper summary for a draft / period |
-| `foundry_money_summary` | Bursar P&L for a draft / client / period |
+| `foundry_scorecard` | Inspector summary for a draft / period |
+| `foundry_money_summary` | Paymaster P&L for a draft / client / period |
 
 All handlers return JSON strings, never raise (per the official guide).
 (Dropped 2026-11-06: `foundry_dashboard_render` — it imported
@@ -221,12 +221,12 @@ Full script: `docs/DEMO.md`. Beat sheet:
 
 1. **0–10s — the problem:** "Creator tools forget. Foundry remembers."
    Show the ledger: one Identity Card, shared by all five bots.
-2. **10–35s — the loop:** Lookout evidence → Scribe draft v1 on the
+2. **10–35s — the loop:** Prospector evidence → Smith draft v1 on the
    Proofing Table. Point at the citations under the draft.
 3. **35–60s — the human moment:** Tap "Tweak — sharper hook".
-   Scribe returns v2 in seconds. Show v1 → v2 diff + Revision Card.
-4. **60–80s — the money moment:** Switch to Scorekeeper (this post
-   worked) then Bursar (and it made $X after costs). Same post,
+   Smith returns v2 in seconds. Show v1 → v2 diff + Revision Card.
+4. **60–80s — the money moment:** Switch to Inspector (this post
+   worked) then Paymaster (and it made $X after costs). Same post,
    one view.
 5. **80–90s — close:** "Five bots, one memory, one ledger. Foundry."
    Deadline + entry details on screen.
@@ -247,13 +247,13 @@ Full script: `docs/DEMO.md`. Beat sheet:
 |---|---|---|
 | Thu Nov 5 (evening) | Idea locked; research | Spec v0.1, research notes |
 | Fri Nov 6 | Scaffold + spec (this repo) | Smoke test green; dashboard renders from seed |
-| Sat Nov 7 | Live Scribe + Lookout wiring (stub → `ctx.llm` / search) | Draft loop works with a real model call, not just seed |
-| Sun Nov 8 | Dashboard polish; Score/Bursar tabs real from ledger | All three tabs read live ledger, cross-linked |
+| Sat Nov 7 | Live Smith + Prospector wiring (stub → `ctx.llm` / search) | Draft loop works with a real model call, not just seed |
+| Sun Nov 8 | Dashboard polish; Score/Paymaster tabs real from ledger | All three tabs read live ledger, cross-linked |
 | Mon Nov 9 | Hermes validation; fix `validate`/`doctor` findings | Both commands pass; catalog PR draft ready |
 | Tue Nov 10 | Demo video (script, record, < 90s); README disclosures | Video reviewed by Amit; PR draft reviewed |
 | Wed Nov 11 (AM) | Submit: PR + video + Typeform, **with Amit's go-ahead only** | All three links submitted before 2 PM PST |
 | Wed Nov 11, 2 PM PST | Deadline | — |
 
-Times are Pacific. If a day slips, cut backlog first, then Bursar
-depth, then Scorekeeper depth — never cut the Proofing Table loop
+Times are Pacific. If a day slips, cut backlog first, then Paymaster
+depth, then Inspector depth — never cut the Proofing Table loop
 or the human-approval gate.

@@ -187,7 +187,7 @@ Full record: `docs/VALIDATION.md`.
   `complete_structured(*, instructions, input, json_schema=None, json_mode=False, ...) -> PluginLlmStructuredResult` with `.parsed`.
   Plain calls with **no provider/model override pass the default trust
   gate** (missing `plugins.entries.<id>.llm` config → fully restrictive
-  only on *overrides*). Scribe uses `complete()` with no overrides.
+  only on *overrides*). Smith uses `complete()` with no overrides.
   **Wired, not live-tested:** `scribe_revise` takes an `llm_complete`
   callable; `tools.bind_ctx(ctx)` in `register()` lets handlers call
   `ctx.llm.complete(...)`; any failure falls back to the rule-based
@@ -202,7 +202,7 @@ Full record: `docs/VALIDATION.md`.
 - **No `ctx` web-search surface in v0.23.0.** `plugins.py` has no
   search/fetch method on `PluginContext`; web search lives in
   `tools/web_tools.py` / `agent/web_search_provider.py` as host
-  internals, not a plugin-facing API. Lookout therefore stays
+  internals, not a plugin-facing API. Prospector therefore stays
   agent-supplied (host agent searches, passes sources in) — no
   plugin-internal fetch. A plugin could reach it via `ctx.call_mcp`
   to a configured search MCP server, but no such server is configured
@@ -254,7 +254,7 @@ Full record: `docs/VALIDATION.md`.
 ## UNVERIFIED — do not present as fact
 
 - **Live X / analytics / money APIs.** No live X, Buffer, Stripe or
-  analytics integration exists in the scaffold. Scorekeeper/Bursar
+  analytics integration exists in the scaffold. Inspector/Paymaster
   numbers in the seed are illustrative example data, not real metrics.
 - **Catalog entry file format** (`plugin-catalog/*.yaml` fields for the
   entry PR itself) — not read in full. Required before the PR.

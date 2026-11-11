@@ -2,7 +2,7 @@
 
 Foundry is an end-to-end creator plugin for Hermes Agent: a crew of five bots
 sharing **one structured memory ledger**, with a four-tab board
-(Proofing Table / Brand / Scorekeeper / Bursar) on the web dashboard **and** in
+(Proofing Table / Brand / Inspector / Paymaster) on the web dashboard **and** in
 the Desktop app. First run: say "foundry start" in chat — a short
 interview sets up your brand (only the first question is required);
 your brand lives in the Brand tab.
@@ -17,9 +17,9 @@ submissions due **5 PM EST Wed Nov 11, 2026 — 2 PM PST**).
 ## The idea in one paragraph
 
 Most creator tools are a prompt chain: research, draft, post, forget.
-Foundry is a workshop. Five bots — **Cartographer** (interview),
-**Lookout** (sourced research), **Scribe** (writer), **Scorekeeper**
-(analytics), **Bursar** (costs, profit, partnerships, tax tracking) —
+Foundry is a workshop. Five bots — **Patternmaker** (interview),
+**Prospector** (sourced research), **Smith** (writer), **Inspector**
+(analytics), **Paymaster** (costs, profit, partnerships, tax tracking) —
 read and write the same versioned ledger cards. A draft cannot exist
 without citing an Evidence Card. Feedback becomes a Revision Card.
 Performance and money write back, so the next cycle is smarter.
@@ -52,7 +52,7 @@ foundry/                  # the installable Hermes plugin directory
   tools.py                # tool handlers (always return JSON strings)
   ledger.py               # shared ledger: SQLite cards + links + events
   storage.py              # durable ledger location: plugin_db("foundry")
-  bots.py                 # Cartographer / Lookout / Scribe / Scorekeeper / Bursar
+  bots.py                 # Patternmaker / Prospector / Smith / Inspector / Paymaster
   dashboard/
     manifest.json         # web-dashboard tab (name, label, tab path, entry)
     dist/index.js         # dashboard UI bundle (IIFE, SDK React)
@@ -78,7 +78,7 @@ scripts/                  # seed.py, render_dashboard.py, demo.py
 Validated in the VM against Hermes **v0.23.0** (2026-11-06):
 `hermes plugins validate` PASS (16 checks, incl. the desktop-surface
 check), `hermes plugins doctor` PASS (8 tools). Smoke test 34/34.
-Full record: `docs/VALIDATION.md`. Live Scribe verified on Mac Studio
+Full record: `docs/VALIDATION.md`. Live Smith verified on Mac Studio
 (Nov 10, 2026): draft-003 produced with `generation: "llm"`. Live
 web-dashboard tabs confirmed rendering on Mac Studio (Nov 10, after
 the Tabs render-prop fix); the vertical-feed redesign + Brand tab
@@ -102,9 +102,9 @@ Do not submit without Amit's go-ahead.
 ## Rules baked in
 
 - **Approval is disabled, not implemented.** There is no trusted human review channel yet, so the Approve buttons are disabled and the approve routes fail closed. Nothing auto-posts, auto-sends, or auto-buys. Ever.
-- **Tax tracking only.** Bursar categorises, estimates and exports.
+- **Tax tracking only.** Paymaster categorises, estimates and exports.
   It gives no tax advice and files nothing.
-- **No invented facts.** Scribe drafts only from cited Evidence Cards;
+- **No invented facts.** Smith drafts only from cited Evidence Cards;
   a claim with no source is cut.
 - **No secrets in the repo.** No API keys, no `.env`, no credentials.
   See `.gitignore`.

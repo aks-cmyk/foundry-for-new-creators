@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def register(ctx):
     # Bind ctx so tool handlers can reach the host LLM (ctx.llm) for
-    # live Scribe revisions; unbound outside Hermes, Scribe falls back
+    # live Smith revisions; unbound outside Hermes, Smith falls back
     # to the rule-based rewrite.
     tools.bind_ctx(ctx)
     for schema in schemas.ALL_SCHEMAS:

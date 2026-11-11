@@ -22,11 +22,11 @@
                             │
                    ┌────────▼────────┐
                    │  Bots (bots.py) │
-                   │  Cartographer   │
-                   │  Lookout        │
-                   │  Scribe         │
-                   │  Scorekeeper    │
-                   │  Bursar         │
+                   │  Patternmaker   │
+                   │  Prospector        │
+                   │  Smith         │
+                   │  Inspector    │
+                   │  Paymaster         │
                    └────────┬────────┘
                             │
                    ┌────────▼────────┐
@@ -62,11 +62,11 @@ that makes the shared memory real: if two bots need to coordinate,
 there is a card for it, with provenance.
 
 **MVP implementation note (honest):** the scaffold's bots are
-deterministic and template-based. Scribe's v2 "sharper hook"
+deterministic and template-based. Smith's v2 "sharper hook"
 revision is a rule-based rewrite of the seeded v1, not a live LLM
-call. Lookout does not fetch the web in the scaffold — Evidence
+call. Prospector does not fetch the web in the scaffold — Evidence
 Cards come from seed data or from user-supplied sources. The live
-wiring (Scribe via `ctx.llm`, Lookout via a search provider) is
+wiring (Smith via `ctx.llm`, Prospector via a search provider) is
 the Sat Nov 7 step in the plan, and its exact `ctx.llm` call shape
 is UNVERIFIED — see RESEARCH.md.
 
@@ -147,17 +147,17 @@ Read-only, as the guide requires.
 
 ## Data flow — one loop
 
-1. Cartographer writes Identity Card v1 (seeded in the demo).
-2. Lookout writes Evidence Card E1 (seeded; 2 sources, links).
-3. Scribe writes Draft Card D1 citing E1.
+1. Patternmaker writes Identity Card v1 (seeded in the demo).
+2. Prospector writes Evidence Card E1 (seeded; 2 sources, links).
+3. Smith writes Draft Card D1 citing E1.
 4. Human, on the Proofing Table, writes Revision Card R1
    ("Tweak — sharper hook").
-5. Scribe writes Draft Card D2 (supersedes D1), citing E1 + R1.
+5. Smith writes Draft Card D2 (supersedes D1), citing E1 + R1.
 6. Human reviews D2 on the Proofing Table — tweak or reject
    (approval is disabled: the approve routes fail closed and
-   nothing auto-posts). Scorekeeper writes Performance Card P1.
-7. Bursar writes Money Card M1 for D2 (costs, revenue, profit).
-8. Next cycle: Lookout reads P1 + M1 before writing E2.
+   nothing auto-posts). Inspector writes Performance Card P1.
+7. Paymaster writes Money Card M1 for D2 (costs, revenue, profit).
+8. Next cycle: Prospector reads P1 + M1 before writing E2.
 
 > Note (2026-11-11): step 6 (human approval) is currently **disabled** —
 > the approve routes fail closed until a trusted human review channel

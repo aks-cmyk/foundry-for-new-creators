@@ -16,15 +16,15 @@ seeded demo brand until you have your own.
 
 ## How a cycle flows
 
-1. **Cartographer** interviews you → Identity Card (your brand).
-2. **Lookout** finds sourced evidence → Evidence Card (at least 2
+1. **Patternmaker** interviews you → Identity Card (your brand).
+2. **Prospector** finds sourced evidence → Evidence Card (at least 2
    sources with links; unconfirmed claims are dropped).
-3. **Scribe** drafts from cited Evidence Cards only, in your
+3. **Smith** drafts from cited Evidence Cards only, in your
    brand's voice → Draft Card.
 4. **Proofing Table** — you tweak (one-line note) or reject (reason);
-   feedback becomes a Revision Card and Scribe returns a new
+   feedback becomes a Revision Card and Smith returns a new
    version. Approval is disabled, so nothing posts from this flow.
-5. **Scorekeeper** and **Bursar** record performance and money for
+5. **Inspector** and **Paymaster** record performance and money for
    the same draft; the next cycle learns from them.
 
 ## Demo content
@@ -39,13 +39,13 @@ are the only cards until you run `foundry_start`.
 
 ## The crew
 
-- **Cartographer** — interviews you, owns the brand.
-- **Lookout** — sourced research (agent-supplied; no live web-search
+- **Patternmaker** — interviews you, owns the brand.
+- **Prospector** — sourced research (agent-supplied; no live web-search
   surface exists in Hermes v0.23.0).
-- **Scribe** — drafts from cited Evidence Cards only. A claim with no
+- **Smith** — drafts from cited Evidence Cards only. A claim with no
   source is cut. Live revisions use the host model via `ctx.llm`.
-- **Scorekeeper** — performance: what to repeat, what to drop.
-- **Bursar** — costs, revenue, profit, brand partnerships, tax
+- **Inspector** — performance: what to repeat, what to drop.
+- **Paymaster** — costs, revenue, profit, brand partnerships, tax
   tracking (tracking only — no advice, no filing).
 
 Every bot reads and writes the same versioned ledger cards. Feedback
@@ -56,7 +56,7 @@ next cycle is smarter.
 
 Four tabs, on the web dashboard and in the Desktop app (opt-in):
 **Proofing Table** (all drafts, newest first — Tweak / Reject feed
-back to Scribe), **Brand**, **Scorekeeper**, **Bursar**.
+back to Smith), **Brand**, **Inspector**, **Paymaster**.
 
 **Approval is disabled, not implemented.** There is no trusted human
 review channel yet, so the Approve buttons are disabled and the
@@ -86,9 +86,9 @@ validate 16/16, doctor 8 tools, smoke test 34/34. Full record in
 ## Disclosures
 
 - **Network calls:** none. The plugin makes no calls to third-party
-  services. Scribe's live revision path uses the host model's
+  services. Smith's live revision path uses the host model's
   `ctx.llm` (no external API key held by the plugin).
-  Scorekeeper/Bursar numbers in the seeded demo are illustrative
+  Inspector/Paymaster numbers in the seeded demo are illustrative
   example data, labelled `estimated` on the dashboard.
 - **Reads outside its own data:** none. The plugin reads only its own
   ledger, stored at `plugin_db("foundry")`.

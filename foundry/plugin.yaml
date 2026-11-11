@@ -7,7 +7,7 @@ version: 0.1.0
 manifest_version: 2
 api_version: 1
 license: MIT
-description: "Foundry — a creator plugin: five bots (Cartographer, Lookout, Scribe, Scorekeeper, Bursar) sharing one structured memory ledger, with a Proofing Table, a Brand tab, and Score/Money dashboards. Start here: say 'foundry start' — a short interview sets up your brand. Approval is disabled — no trusted human review channel yet; Tweak/Reject feedback is recorded as unverified. No auto-post."
+description: "Foundry — a creator plugin: five bots (Patternmaker, Prospector, Smith, Inspector, Paymaster) sharing one structured memory ledger, with a Proofing Table, a Brand tab, and Score/Money dashboards. Start here: say 'foundry start' — a short interview sets up your brand. Approval is disabled — no trusted human review channel yet; Tweak/Reject feedback is recorded as unverified. No auto-post."
 author: Amit Srivastava
 homepage: https://github.com/aks-cmyk/foundry-for-new-creators
 # UNVERIFIED: requires_hermes floor is the docs' example floor.

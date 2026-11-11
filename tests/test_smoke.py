@@ -42,7 +42,7 @@ def main():
         check("draft-002 cites evidence-001",
               any(l["to_id"] == "evidence-001" and l["relation"] == "cites" for l in d2["links"]))
 
-        # Scribe refuses without evidence
+        # Smith refuses without evidence
         try:
             bots.scribe_draft(conn, evidence_id="evidence-999", identity_id="identity-001",
                               hook="x", body=["y"])
@@ -66,9 +66,9 @@ def main():
               and ledger.get_card(conn, draft["id"])["payload"]["hook"] == "A test hook.")
         check("rule-based revise marks generation", revised["payload"].get("generation") == "rule-based")
 
-        # Live Scribe path (fake llm): JSON reply replaces the draft
+        # Live Smith path (fake llm): JSON reply replaces the draft
         def fake_llm(messages):
-            assert messages[0]["role"] == "system" and "Scribe" in messages[0]["content"]
+            assert messages[0]["role"] == "system" and "Smith" in messages[0]["content"]
             return json.dumps({"hook": "LLM hook.", "body": ["LLM post one.", "LLM post two."]})
         llm_revised = bots.scribe_revise(conn, draft_id=revised["id"], note="sharper hook",
                                          llm_complete=fake_llm)
@@ -209,7 +209,7 @@ def main():
     out_path = render()
     html_text = out_path.read_text()
     check("dashboard renders with all four tabs",
-          all(t in html_text for t in ("Proofing Table", "Brand", "Scorekeeper", "Bursar")))
+          all(t in html_text for t in ("Proofing Table", "Brand", "Inspector", "Paymaster")))
     check("dashboard shows seeded v2 hook", "Your last 100 posts taught your tools nothing" in html_text)
     check("dashboard shows all drafts newest-first",
           html_text.count("Demo: X thread draft") >= 2

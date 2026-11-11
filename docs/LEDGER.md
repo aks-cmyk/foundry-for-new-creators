@@ -61,7 +61,7 @@ new row with `supersedes_id` set. Money is integer cents in
 
 ## Identity Card (`kind = identity`)
 
-The Cartographer's output. Versioned: a re-interview writes v2,
+The Patternmaker's output. Versioned: a re-interview writes v2,
 it never overwrites v1.
 
 | Field | Type | Required | Notes |
@@ -80,21 +80,21 @@ Status: `active` | `superseded`.
 
 ## Evidence Card (`kind = evidence`)
 
-The Lookout's output. A draft may cite it only if it has ≥2 sources.
+The Prospector's output. A draft may cite it only if it has ≥2 sources.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `topic` | string | yes | What this evidence is about |
 | `sources` | object[] | yes, ≥2 | Each: `{title, url, retrieved_at, note}` |
 | `confirmed` | string[] | yes | Claims confirmed by a source |
-| `unconfirmed` | string[] | no | Claims that could not be confirmed — Scribe must not use them |
+| `unconfirmed` | string[] | no | Claims that could not be confirmed — Smith must not use them |
 | `niche` | string | yes | Which pillar this serves |
 
 Status: `active` | `stale` (older than 30 days, or superseded by newer evidence).
 
 ## Draft Card (`kind = draft`)
 
-The Scribe's output. One lineage per post; v1, v2… are separate rows.
+The Smith's output. One lineage per post; v1, v2… are separate rows.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -125,7 +125,7 @@ Status: `open` | `applied` | `dismissed`.
 
 ## Performance Card (`kind = performance`)
 
-The Scorekeeper's output, linked to a Draft Card (`measures`).
+The Inspector's output, linked to a Draft Card (`measures`).
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -145,7 +145,7 @@ labelled as such on the dashboard — never presented as real metrics).
 
 ## Money Card (`kind = money`)
 
-The Bursar's output, linked to a Draft Card (`prices`) and optionally
+The Paymaster's output, linked to a Draft Card (`prices`) and optionally
 to a Partnership record.
 
 | Field | Type | Required | Notes |
@@ -190,11 +190,11 @@ Status: `draft` | `final`.
 
 ## Worked example (seed data)
 
-- `identity-001` v1 — Cartographer, "Creator who helps builders…"
-- `evidence-001` v1 — Lookout, 2 sources, topic "creator tools forget"
-- `draft-001` v1 — Scribe, cites `evidence-001`, status `in_review`
+- `identity-001` v1 — Patternmaker, "Creator who helps builders…"
+- `evidence-001` v1 — Prospector, 2 sources, topic "creator tools forget"
+- `draft-001` v1 — Smith, cites `evidence-001`, status `in_review`
 - `revision-001` — unverified author (seeded demo data, not a real human review), `tweak`, "sharper hook", applied in `draft-002`
-- `draft-002` v2 — Scribe, supersedes `draft-001`, status `in_review` (seeded demo data; approval is disabled — no trusted human review channel yet)
-- `performance-001` — Scorekeeper, measures `draft-002`, verdict `repeat`
-- `money-001` — Bursar, prices `draft-002`, profit computed from seed costs
-- `money-002` — Bursar, partnership record, one seeded deal, status `terms`
+- `draft-002` v2 — Smith, supersedes `draft-001`, status `in_review` (seeded demo data; approval is disabled — no trusted human review channel yet)
+- `performance-001` — Inspector, measures `draft-002`, verdict `repeat`
+- `money-001` — Paymaster, prices `draft-002`, profit computed from seed costs
+- `money-002` — Paymaster, partnership record, one seeded deal, status `terms`

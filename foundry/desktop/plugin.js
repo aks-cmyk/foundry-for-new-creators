@@ -7,7 +7,7 @@
 // .hermes-package.json marker and hot-reloads it.
 //
 // It mirrors the web-dashboard board (foundry/dashboard/dist/index.js):
-// Proofing Table / Brand / Scorekeeper / Bursar over the SAME backend,
+// Proofing Table / Brand / Inspector / Paymaster over the SAME backend,
 // reached via ctx.rest('/cards'), ctx.rest('/summary') and the POST
 // /feedback endpoint in foundry/dashboard/plugin_api.py — that backend
 // namespace is the one piece shared between the two SDKs.
@@ -149,7 +149,7 @@ function FoundryPage({ rest }) {
         jsx('pre', { style: { whiteSpace: 'pre-wrap' }, children: d.payload.text }),
         jsx('p', { style: mutedStyle, children: 'Evidence: ' + (d.payload.evidence_ids || []).join(', ') }),
         jsx('input', {
-          type: 'text', value: draftNote(d.id), 'aria-label': 'One-line note for Scribe',
+          type: 'text', value: draftNote(d.id), 'aria-label': 'One-line note for Smith',
           placeholder: 'One-line note, e.g. sharper hook',
           style: { width: '100%', padding: '6px', marginBottom: '8px' },
           onChange: function (e) { setDraftNote(d.id, e.target.value) }
@@ -161,7 +161,7 @@ function FoundryPage({ rest }) {
           jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback(d.id, 'tweak') }, children: 'Tweak' }),
           jsx('button', { style: btnStyle, disabled: busy, onClick: function () { sendFeedback(d.id, 'reject') }, children: 'Reject' })
         ] }),
-        jsx('p', { style: mutedStyle, children: 'Approval is disabled — no trusted human review channel yet. Nothing auto-posts. Tweak sends the note to Scribe and returns a new draft version — the original is never changed; feedback is recorded as unverified.' })
+        jsx('p', { style: mutedStyle, children: 'Approval is disabled — no trusted human review channel yet. Nothing auto-posts. Tweak sends the note to Smith and returns a new draft version — the original is never changed; feedback is recorded as unverified.' })
       ] })
     }) }) : jsx('p', { children: 'No drafts yet.' })
   } else if (tab === 'brand') {
@@ -228,8 +228,8 @@ function FoundryPage({ rest }) {
     jsxs('div', { children: [
       jsx('button', { style: tabBtnStyle, onClick: function () { setTab('proofing'); setBrandForm(null) }, children: 'Proofing Table' }),
       jsx('button', { style: tabBtnStyle, onClick: function () { setTab('brand'); setBrandForm(null) }, children: 'Brand' }),
-      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('score'); setBrandForm(null) }, children: 'Scorekeeper' }),
-      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('money'); setBrandForm(null) }, children: 'Bursar' })
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('score'); setBrandForm(null) }, children: 'Inspector' }),
+      jsx('button', { style: tabBtnStyle, onClick: function () { setTab('money'); setBrandForm(null) }, children: 'Paymaster' })
     ] }),
     body
   ] })
@@ -238,7 +238,7 @@ function FoundryPage({ rest }) {
 export default {
   id: 'foundry',
   name: 'Foundry',
-  description: 'Creator plugin: Proofing Table, Brand tab, Scorekeeper and Bursar over one shared ledger. Say "foundry start" to set up your brand.',
+  description: 'Creator plugin: Proofing Table, Brand tab, Inspector and Paymaster over one shared ledger. Say "foundry start" to set up your brand.',
   defaultEnabled: false,
   register(ctx) {
     var rest = ctx.rest
